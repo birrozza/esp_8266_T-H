@@ -103,7 +103,6 @@
                 <br>
                 <label for="username">Username :</label><br>
                     <input type="text" id="username" name="username" placeholder="Username" style="color: red; -webkit-appearance: none; appearance: none;" >
-                <!<div class="box"></div>
                 <br>
                 <br>
                 <label for="password">Password:</label><br>
@@ -118,18 +117,17 @@
             </div>
         </form>
             <script type="text/javascript">
-                const form     = document.querySelector('form');
+                const form = document.querySelector('form');
                 const userName = document.getElementById('username');
                 const passWord = document.getElementById('password');
-                
+
                 form.onsubmit = function (e) {
-                    if (userName.value === '' || passWord.value === ''){
+                    if (userName.value === '' || passWord.value === '') {
                         e.preventDefault();
                         alert('Completa i campi username e password');
                         console.log(e);
                     }
                 };
-                
             </script>
     </body>
 </html>
