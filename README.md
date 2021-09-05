@@ -51,6 +51,6 @@ On the <strong>setting page</strong> you can find different values, such as the 
 Below, in the <strong>File Manager</strong> section, you have the image of the <strong>SPIFFS</strong> and further down, you have the possibility to update the Html files as well as upload new ones.
 
 
-<strong>Stay tuned!!! (last update June 2020)</strong>
+<strong>Stay tuned!!! (last update June 2021)</strong>
 
 If you want to support me, you can always donate to my paypal account https://www.paypal.me/birrozza  or tiping me. Thanks
