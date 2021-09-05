@@ -116,23 +116,11 @@
             <div class="autore" >
                     <span style="color: #fff333;" >Powered by A. Mirabelli</span>                            
             </div>
-         </form>
-<!       <canvas class="myCanvas">
-<!          <p><!Da aggiungere un'alternativa adatta </p>
-<!       </canvas>    
-<!<label for="price"><!Choose a maximum house price: </label>
-<!<input type="range" name="price" id="price" min="50000" max="500000" step="100" value="250000">
-<!<output class="price-output" for="price"></output>
-<!<meter class="progress" min="0" max="100" value="75" low="33" high="66" optimum="50"><!75</meter>
+        </form>
             <script type="text/javascript">
                 const form     = document.querySelector('form');
                 const userName = document.getElementById('username');
                 const passWord = document.getElementById('password');
-                
-                //const canvas = document.querySelector('.myCanvas');
-                //const ctx = canvas.getContext('2d');
-                
-                //const creaDisegno = setInterval(Disegna, 500);
                 
                 form.onsubmit = function (e) {
                     if (userName.value === '' || passWord.value === ''){
@@ -142,39 +130,6 @@
                     }
                 };
                 
-                function Disegna (){
-                    let min=1;
-                    let max=100;
-                    let larghezza = Math.floor(Math.random() * (max - min)) + min;
-                    let altezza   = Math.floor(Math.random() * (max - min)) + min;
-                    let coloreR    = Math.floor(Math.random() * (255 - 0)) + 0;
-                    let coloreG    = Math.floor(Math.random() * (255 - 0)) + 0;
-                    let coloreB    = Math.floor(Math.random() * (255 - 0)) + 0;
-                    
-                    ctx.fillStyle ='rgba(210,210,210,.25)';
-                    //ctx.globalCompositeOperation='hue';
-                    ctx.fillRect(0,0,canvas.width,canvas.height);
-                    //ctx.clearRect(0,0,canvas.width,canvas.height);
-                    
-                    let rGB = 'rgb('+coloreR+','+coloreG+','+coloreB+')';
-                    
-                    ctx.lineWidth=1;
-                    ctx.strokeStyle = rGB;
-                    ctx.strokeRect(larghezza,altezza,larghezza,altezza);  
-                    requestAnimationFrame(Disegna);
-                }
-                //Disegna();
-/*              
-                const price = document.querySelector('#price');
-                const output = document.querySelector('.price-output');
-                const pro=document.querySelector('.progress');
-
-                output.textContent = price.value;
-                pro.value=price.value;
-                price.addEventListener('input', function() {
-                      output.textContent = price.value;
-                      pro.value= price.value*50/255000;
-                });*/
             </script>
     </body>
 </html>
