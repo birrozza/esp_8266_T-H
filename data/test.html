@@ -6,24 +6,25 @@
        <style type="text/css">
             @import "https://use.fontawesome.com/releases/v5.5.0/css/all.css";
             body {
-                background-color: black;
+                background: black;
                 margin: 0;
                 padding: 0;
                 font-family: sans-serif;
             }
-            .login-box {
+            form {
                 width: 280px;
                 position: absolute;
-                top: 50%;
+                top: 45%;
                 left: 50%;
                 transform: translate(-50%, -50%);
                 color: white;
             }
-            .login-box h1 {
+            h1 {
+                
                 float: left;
                 font-size: 40px;
                 border-bottom: 6px solid #4caf50;
-                margin-bottom: 50px;
+                margin-bottom: 25px;
                 padding: 13px 0
             }
             .textbox{
@@ -59,20 +60,41 @@
                 cursor: pointer;
                 margin: 18px 0;
             }
+            input.btn:hover {
+                background: green;    
+            }
+            input.btn:active {
+                background: darkgreen;
+            }
        </style> 
     </head>
     <body>
-        <div class="login-box">
+        <form action="login" method="POST">
             <h1>Login</h1>
             <div class="textbox">
                 <i class="fas fa-user"></i>
-                <input type="text" placeholder="username" name="" value="">
+                <input type="text" id="username" placeholder="username" name="" value="">
             </div>
             <div class="textbox">
                 <i class="fa fa-lock" aria-hidden="true"></i>
-                <input type="password" placeholder="password" name="" value="">
+                <input type="password" id="password" placeholder="password" name="" value="">
             </div>
-            <input class="btn" type="button" name="" value="Sign in"
-        </div>
+            <input class="btn" type="submit" value="Sign in">
+            
+        </form>
+        <script type="text/javascript">
+            const form = document.querySelector('form');
+            const userName = document.getElementById('username');
+            const passWord = document.getElementById('password');
+            console.log(form);
+            form.onsubmit = function (e) {
+                console.log("111");
+                if (userName.value === '' || passWord.value === '') {
+                    e.preventDefault();
+                    alert('Completa i campi username e password');
+                    console.log(e);
+                }
+            };
+        </script>
     </body>
 </html>
