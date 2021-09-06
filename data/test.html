@@ -56,6 +56,7 @@
                 width: 100%;
                 background: none;
                 border: 2px solid #4caf50;
+                border-radius: 5px;
                 color: white;
                 padding: 5px;
                 font-size: 18px;
@@ -68,7 +69,10 @@
             }
             input.btn:active {
                 background: rgb(1, 80, 1);
+                position:relative;
+	            top: 3px;
             }
+            
        </style> 
     </head>
     <body>
@@ -95,12 +99,13 @@
             window.alert = function (message) {
                 var a = document.createElement('div');
                 //regole di stile CSS
-                a.style.cssText = "cursor: pointer; width:30vw; height:85px; border:3px solid red; border-radius:5px; padding:10px; background:lightgray; box-shadow:0px 0px 8px #0006; position:fixed; top:20px; right:0; left:0; margin:auto; font-family: \"Arial\", sans-serif; color:black; z-index:1000;";
+                a.style.cssText = "cursor: pointer; width:30vw; height:85px; border:1px solid red; border-radius:5px; padding:10px; background:lightgray; box-shadow:0px 0px 8px #0006; position:fixed; top:20px; right:0; left:0; margin:auto; font-family: \"Arial\", sans-serif; color:black; z-index:1000; box-shadow: 5px 10px 20px 0 rgba(100,200,100,0.8), 0 6px 20px 0 rgba(200,200,200,0.5);transform: translate(0%, 70%);";
                 a.innerHTML = "<b>Attenzione</b><br><br>"+message;
                 document.body.appendChild(a);
                 a.addEventListener("click", function() {
                     a.remove();
                     button.disabled=false;
+                    button.style.cssText="background: black; ";
                     //console.log('attivo = (false)', button.disabled);
                 })
             };
@@ -109,7 +114,7 @@
                 if (userName.value === '' || passWord.value === '') {
                     e.preventDefault();
                     button.disabled=true;
-                    //console.log('disattivo = (true)', button.disabled);
+                    button.style.cssText="background: rgb(1, 80, 1); ";
                     alert('Completa i campi username e password. Clicca qui per chiudere');
                 }
             };
