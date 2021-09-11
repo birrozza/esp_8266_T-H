@@ -10,6 +10,7 @@
                 margin: 0;
                 padding: 0;
                 font-family: sans-serif;
+                
             }
             form {
                 width: 280px;
@@ -86,35 +87,39 @@
                 <i class="fa fa-lock" aria-hidden="true"></i>
                 <input type="password" id="password" placeholder="password" name="" value="">
             </div>
-            <input id="btne" class="btn" type="submit" value="Sign in">
-            
+            <input id="btne" class="btn" type="submit" value="Sign in">            
         </form>
         <script type="text/javascript">
             const form = document.querySelector('form');
+            const button = document.getElementById('btne');
             const userName = document.getElementById('username');
             const passWord = document.getElementById('password');
-            const button = document.getElementById('btne');
             
             //ALERT
             window.alert = function (message) {
                 var a = document.createElement('div');
                 //regole di stile CSS
                 a.style.cssText = "cursor: pointer; width:30vw; height:85px; border:1px solid red; border-radius:5px; padding:10px; background:lightgray; box-shadow:0px 0px 8px #0006; position:fixed; top:20px; right:0; left:0; margin:auto; font-family: \"Arial\", sans-serif; color:black; z-index:1000; box-shadow: 5px 10px 20px 0 rgba(100,200,100,0.8), 0 6px 20px 0 rgba(200,200,200,0.5);transform: translate(0%, 70%);";
-                a.innerHTML = "<b>Attenzione</b><br><br>"+message;
+                a.innerHTML = "<b>Attenzione</b><br><br>" + message;
                 document.body.appendChild(a);
                 a.addEventListener("click", function() {
                     a.remove();
-                    button.disabled=false;
-                    button.style.cssText="background: black; ";
-                    //console.log('attivo = (false)', button.disabled);
+                    button.disabled=false; //abilita il tasto
+                    button.style.cssText="background: black; cursor: pointer;";
+                    userName.style.cursor = 'text';
+                    passWord.style.cursor = 'text';
+                    form.style.filter = 'blur(0px)';
                 })
             };
 
             form.onsubmit = function (e) {
                 if (userName.value === '' || passWord.value === '') {
                     e.preventDefault();
-                    button.disabled=true;
-                    button.style.cssText="background: rgb(1, 80, 1); ";
+                    button.disabled=true; // disabilita il tasto
+                    button.style.cssText="background: rgb(1, 80, 1); cursor: default;";
+                    userName.style.cursor = 'default';
+                    passWord.style.cursor = 'default';
+                    form.style.filter = 'blur(2px)';
                     alert('Completa i campi username e password. Clicca qui per chiudere');
                 }
             };
