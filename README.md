@@ -50,7 +50,10 @@ ESP will try to connect. If successful, it relinquishes control back to your app
 On the <strong>setting page</strong> you can find different values, such as the <strong>IP address</strong> of the card, its <strong>ID name</strong>, the name of the <strong>wi-fi</strong> network and its power (<strong>RSSI</strong>), and other specific card data.
 Below, in the <strong>File Manager</strong> section, you have the image of the <strong>SPIFFS</strong> and further down, you have the possibility to update the Html files as well as upload new ones.
 
+<h3><strong>+++ NEWS +++</strong></h3>
 
-<strong>Stay tuned!!! (last update June 2021)</strong>
+<h2><strong>Enabled a Telegram bot to be able to interrogate the sensor. Beta version already available</strong></h2>
+
+<strong>Stay tuned!!! (last update September 2021)</strong>
 
 If you want to support me, you can always donate to my paypal account https://www.paypal.me/birrozza  or tiping me. Thanks
