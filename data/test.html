@@ -7,10 +7,34 @@
             @import "https://use.fontawesome.com/releases/v5.5.0/css/all.css";
             body {
                 background: black;
+                background: url('https://vod.rcsobjects.it/youreporter/photoyr/big/815821.jpg');
                 margin: 0;
                 padding: 0;
                 font-family: sans-serif;
+                background-size: cover;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
                 
+            }
+            .wrapper {
+                width: 450px;
+                height: 300px;
+                padding: 20px;
+                background: linear-gradient(70deg, rgba(191, 236, 238, 0.2) 45% ,rgba(26, 13, 216, 0.1) 80%);
+                backdrop-filter: blur(6px);
+                border: 1px solid transparent;
+                border-radius: 10px;
+                box-shadow: 0px 0px 2px white;
+                display: flex;
+                flex-direction: column;
+                color: white;
+    
             }
             form {
                 width: 280px;
@@ -69,14 +93,22 @@
                 background: green;    
             }
             input.btn:active {
-                background: rgb(1, 80, 1);
+                /*background: rgb(1, 80, 1);*/
                 position:relative;
 	            top: 3px;
+            }
+            .aut {
+                position: relative;
+                font-size: 12px;
+                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+                font-style: italic;
+                color: rgb(134, 136, 233);
             }
             
        </style> 
     </head>
     <body>
+        <div class = "wrapper">
         <form action="login" method="POST">
             <h1>Login</h1>
             <div class="textbox">
@@ -87,8 +119,10 @@
                 <i class="fa fa-lock" aria-hidden="true"></i>
                 <input type="password" id="password" placeholder="password" name="" value="">
             </div>
-            <input id="btne" class="btn" type="submit" value="Sign in">            
+            <input id="btne" class="btn" type="submit" value="Sign in"> 
+            <div class = "aut">Powered by  A. Mirabelli</div>           
         </form>
+        </div>
         <script type="text/javascript">
             const form = document.querySelector('form');
             const button = document.getElementById('btne');
@@ -99,13 +133,15 @@
             window.alert = function (message) {
                 var a = document.createElement('div');
                 //regole di stile CSS
+                let beep = new Audio("https://www.soundjay.com/buttons/sounds/beep-24.mp3");
+                beep.play();
                 a.style.cssText = "cursor: pointer; width:30vw; height:85px; border:1px solid red; border-radius:5px; padding:10px; background:lightgray; box-shadow:0px 0px 8px #0006; position:fixed; top:20px; right:0; left:0; margin:auto; font-family: \"Arial\", sans-serif; color:black; z-index:1000; box-shadow: 5px 10px 20px 0 rgba(100,200,100,0.8), 0 6px 20px 0 rgba(200,200,200,0.5);transform: translate(0%, 70%);";
                 a.innerHTML = "<b>Attenzione</b><br><br>" + message;
                 document.body.appendChild(a);
                 a.addEventListener("click", function() {
                     a.remove();
                     button.disabled=false; //abilita il tasto
-                    button.style.cssText="background: black; cursor: pointer;";
+                    button.style.cssText="cursor: pointer;";
                     userName.style.cursor = 'text';
                     passWord.style.cursor = 'text';
                     form.style.filter = 'blur(0px)';
