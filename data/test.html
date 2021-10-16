@@ -34,7 +34,7 @@
                 display: flex;
                 flex-direction: column;
                 color: white;
-    
+                transform: translateY(-10%);
             }
             form {
                 width: 280px;
@@ -113,11 +113,11 @@
             <h1>Login</h1>
             <div class="textbox">
                 <i class="fas fa-user"></i>
-                <input type="text" id="username" placeholder="username" name="" value="">
+                <input type="text" id="username" placeholder="username" name="username" value="">
             </div>
             <div class="textbox">
                 <i class="fa fa-lock" aria-hidden="true"></i>
-                <input type="password" id="password" placeholder="password" name="" value="">
+                <input type="password" id="password" placeholder="password" name="password" value="">
             </div>
             <input id="btne" class="btn" type="submit" value="Sign in"> 
             <div class = "aut">Powered by  A. Mirabelli</div>           
@@ -156,7 +156,7 @@
                     userName.style.cursor = 'default';
                     passWord.style.cursor = 'default';
                     form.style.filter = 'blur(2px)';
-                    alert('Completa i campi username e password. Clicca qui per chiudere');
+                    alert('Complete the username and password fields!!! Click here to close....');
                 }
             };
         </script>
