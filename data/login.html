@@ -3,26 +3,83 @@
     <head>
         <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1">
         <style> 
-        input.tasto {
-              font-size: 1em;
-              letter-spacing: 1px;
-              text-transform: uppercase;
-              text-align: center;
-              border: 2px solid rgba(0,0,200,0.6);
-              background: lightgray;
-              color: rgba(0,0,200,0.6);
-              box-shadow: 1px 1px 2px rgba(0,0,250,0.4);
-              border-radius: 10px;
-              padding: 3px 10px;
-              display: inline-block;
-              cursor: pointer;
-        }
-        input.tasto:hover {
-                color: green;
-                box-shadow: 7px 7px 8px rgba(0,200,0,0.4);
+            body{
+                display: flex;
+                /*position: relative;*/
+                justify-content: center;
+                overflow: hidden; /* Hide scrollbars */
+                top: 0;
+                left: 0;
+                
             }
-
-            h1 {
+            .bodyy{ 
+                position: absolute;
+                font-variant: small-caps;
+                font-family: Helvetica,Arial,sans-serif;
+                /*position: relative;  */             
+                display: flex;
+                justify-content: center;
+                /*align-items: center;   */         
+                height: 100%;
+                width: 100%;
+                background: linear-gradient(241.02deg, rgba(80, 128, 131, 0.72) 0%, rgba(23, 0, 165, 0.78) 100%);
+                   
+            }
+            .eclips1{
+                position: absolute;
+                width: 350px;
+                height: 350px;
+                left: 0px;
+                top: 6px;
+                border-radius: 200px;
+                background: linear-gradient(214.17deg, rgba(155, 224, 170, 0.33) 76.21%, rgba(80, 62, 193, 0.33) 79.78%);
+                filter: blur(70px);
+            }
+            .eclips2{
+                position: absolute;
+                width: 348px;
+                height: 283px;
+                left: 950px;
+                top: 350px;
+                background: linear-gradient(180deg, #1700A5 0%, rgba(196, 196, 196, 0) 100%);
+                filter: blur(200px);
+                border-radius: 200px;
+                transform: rotate(-134.06deg);
+            }
+            .eclips4{
+                position: absolute;
+                width: 362px;
+                height: 360px;
+                left: 270px;
+                top: 360px;
+                background: linear-gradient(122.24deg, rgba(23, 0, 165, 0) -1.44%, #EBDBDB 97.59%);                
+                filter: blur(2px);
+                border-radius: 200px;
+                transform: rotate(-42.36deg);
+            }
+            .eclips5{
+                position: absolute;
+                width: 280px;
+                height: 280px;
+                left: 741.65px;
+                top: 227.68px;
+                background: linear-gradient(122.24deg, rgba(72, 230, 135, 0) -1.44%, rgba(255, 255, 255, 0.2) 97.59%, rgba(255, 255, 255, 0.2) 98.11%, rgba(255, 255, 255, 0.2) 98.11%);
+                filter: blur(2px);
+                border-radius: 200px;
+                transform: rotate(-134.06deg);
+            }
+            #head {  
+                position: absolute; 
+                transform: translateY(150%);                
+                background: linear-gradient(to right, #e1335c 0%,#73172f 100%);
+                color: #ff0;
+                padding:10px;
+                text-align: center;
+                vertical-align: middle; 
+                font-size: 2em;
+            }
+            .ipAdress {
+                position: absolute;
                 letter-spacing: 1px;
                 text-transform: uppercase;
                 text-align: center;
@@ -35,83 +92,121 @@
                 display: inline-block;
                 cursor: default;
             }
-                                                            
-            header {                      
-                background: linear-gradient(to right, #e1335c 0%,#73172f 100%);
-                color: #ff0;
-                padding:10px;
-                text-align: center;
-                vertical-align: middle; 
-                font-size: 2em;
+            .container-temFrame {
+                transform: translate(-5%,70%);
+                position: relative;
+                overflow: hidden;
+                border: 1px solid #4a2bd1;
+                width: 450px;
+                height: 260px;
             }
-            body{ 
-                background: #e9e9e9;
-                
-                padding:15px;
-                color: #48584f;
-                font-family: Helvetica,Arial,sans-serif;
-                font-variant: small-caps;
-                font-size:1em;
+            .resp-temFrame {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border: 0; 
+            } 
+            .container-humFrame{
+                transform: translate(5%,70%);
+                position: relative;
+                overflow: hidden;
+                border: 1px solid #4a2bd1;
+                width: 450px;
+                height: 260px;
+            }
+            .resp-humFrame {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border: 0; 
+            }
+            .aut {
+                position: absolute;
+                font-size: 12px;
+                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+                font-style: italic;
+                color: white;
+                /*color: rgb(134, 136, 233);*/
+            }
+            input.tasto {
+                position: absolute;            
+                transform: translate(-500%,1800%);
+                font-size: 1em;
+                letter-spacing: 1px;
+                text-transform: uppercase;
                 text-align: center;
-            } 
-            footer { 
-                background: linear-gradient(to left, #e1335c 0%,#73172f 100%);
-                padding:10px;
-                text-align: right;
-                vertical-align: bottom;
-                color: #fff333;
-            } 
+                border: 2px solid rgba(0,0,200,0.6);
+                background: lightgray;
+                color: rgba(0,0,200,0.6);
+                box-shadow: 1px 1px 2px rgba(0,0,250,0.4);
+                border-radius: 10px;
+                padding: 3px 10px;
+                /*display: inline-block;*/
+                cursor: pointer;
+            }
+            input.tasto:hover {
+                    color: green;
+                    box-shadow: 7px 7px 8px rgba(0,200,0,0.4);
+            }
+            input.tasto:active {
+                /*background: rgb(1, 80, 1);*/
+                /*position:relative;*/
+	            top: 3px;
+            }
   
         </style>
     </head>
     <body>
-        <h1 class="ipAdress" id="idBouton" style="color: green;">%IP_ADRESS%</h1>
-        <header>
-            :: Temperature & Humidity in Taranto (Italy) ::
+        <div class="bodyy">
+            <div class="eclips1"></div>
+            <div class="eclips2"></div>
+            <div class="eclips4"></div>
+            <div class="eclips5"></div>
+            <h1 class="ipAdress" id="idBouton" style="color: green;" placeholder = "Waiting data...">%IP_ADRESS%</h1>
+            <header id = "head">
+                :: Temperature & Humidity in:    waiting data .... ::
+            </header>
+            <div   class = "container-temFrame"> <!-- width="450" height="260" -->
+                <iframe  id = "temFrame" class = "resp-temFrame" style="border: 1px solid #cccccc;"  placeholder = "Waiting data..." src="https://thingspeak.com/channels/867219/charts/1?bgcolor=%23ffffff&amp;color=%23d62020&amp;dynamic=true&results=60&title=Temperatura&type=line&xaxis=Data">
+                </iframe>
+            </div> 
+            <div  class = "container-humFrame">   
+                <iframe id = "humFrame" class = "resp-humFrame"  style="border: 1px solid #cccccc;"  placeholder = "Waiting data..."> <!--src="https://thingspeak.com/channels/867219/charts/2?bgcolor=%23ffffff&amp;color=%23d62020&amp;dynamic=true&results=60&title=Umidit%C3%A0&type=line&xaxis=Data">-->
+                </iframe>
+            </div>
             
-        </header><br>
-        <iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/867219/charts/1?bgcolor=%23ffffff&amp;color=%23d62020&amp;dynamic=true&results=60&title=Temperatura&type=line&xaxis=Data">
-            
-        </iframe>
-        <iframe width="450" height="260" style="border: 1px solid #cccccc;" src="https://thingspeak.com/channels/867219/charts/2?bgcolor=%23ffffff&amp;color=%23d62020&amp;dynamic=true&results=60&title=Umidit%C3%A0&type=line&xaxis=Data">
-            
-        </iframe>
-        <br>
-        <br>
-        <footer><div>by Mirabelli Angelo</div><div>---------</div></footer>
-        <br>
-        <br>
-        <form action="setpage" method="get">
-            <input type="submit" value="Setting" class="tasto">
-        </form>
-        
-        
-        
+            <div class = "aut">Powered by  A. Mirabelli</div>    
+           
+            <form action="setpage" method="get">
+                <input type="submit" value="Setting" class="tasto">
+            </form> 
+        </div>                   
         <script>
-             var uniqueURL = "/iprequest";
-             var request = new XMLHttpRequest(); // http://www.toutjavascript.com/reference/ref-xmlhttprequest.php
+             const ipAdress = document.getElementById('idBouton');
+             const head = document.getElementById("head");
+             const tempFrame = document.getElementById('temFrame');
+             const humiFrame = document.getElementById('humFrame');
 
-             // la fonction à appeler lors d'un changement d'avancement de la requête AJAX
-             request.onreadystatechange = function() {
-                 console.log('test', uniqueURL);
-                 if (this.readyState == 4) {
-                     // Indicateur de l'avancement de l'appel AJAX == 4 => Données complètement accessibles
-                     if (this.status == 200) {
-                         // Code retour du serveur après l'appel AJAX == 200 => OK, tout s'est bien passé
-                         if (this.responseText != null) {
-                             // si on a bien obtenu une réponse non nulle
-                             // alors on remplace le noeud par la réponse
-                             document.getElementById("idBouton").innerHTML = this.responseText;
-                             
-                         }
-                     }
-                 }
-             }
-             request.open("POST", uniqueURL , false); // ici on envoie la requête GET sur l'URL /reqEtatBouton
-             request.send();
-            
-            
+             var uniqueURL = "/iprequest";
+             
+             fetch(uniqueURL).then(function(response){
+                console.log(response); 
+                return response.json();
+             }).then(function (json){
+                console.log("json");
+                ipAdress.textContent = "IP " + json['ip'];
+                head.textContent = `:: Temperature & Humidity in ${json['city']} (${json['country']}) ::`;
+                tempFrame.src = json['temp'];
+                humiFrame.src = json['humi'];
+            }).catch(function (err){
+                console.log('fetch problem: ' + err.message);
+                console.log(json);
+                ipAdress.textContent = "Fetch problem!!!";
+            });
         </script>
-        
     </body>
 </html>
