@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html charset="UTF-8">
   <head>
-    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1">
-      <style>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1"/>
+    <title>Esp 8266 Setting</title>
+    <style>
           body {
               text-align: center;
               margin: 0;
+              background-color: #555;
+              background: black;
+              background: url('https://vod.rcsobjects.it/youreporter/photoyr/big/815821.jpg');
           }
           textarea {
             font-size: 0.9rem;
@@ -45,8 +50,13 @@
                 color: green;
                 box-shadow: 7px 7px 8px rgba(0,200,0,0.4);
                 cursor: pointer;
-            }
-       p {
+        }
+        .tastoRST:hover{
+                color: red;
+                box-shadow: 7px 7px 8px rgba(200,0,0,0.4);
+                cursor: pointer;
+        }
+        p {
           letter-spacing: 1px;
           text-transform: uppercase;
           text-align: left;
@@ -59,17 +69,16 @@
           display: inline-block;
           cursor: default;
         } 
-       p.boardname{
+        p.boardname{
             color: blueviolet;      
-       }
-       
-       p.ip {
+        }
+        p.ip {
           color: green;
-          }  
-       p.rssi{
+        }  
+        p.rssi{
           color: red;
-       }
-       h1.intestazione{
+        }
+        h1.intestazione{
             
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -102,10 +111,71 @@
           pointer-events: none;
           border: none;
         }
-      </style>
+        /* Notice how we're targeting the dialog box's title bar through the custom class */
+        .myclass .ZebraDialog_Title {
+            background: #c19cee;
+            
+        }
+        .myclass .ZebraDialog_Body {
+            /*background-image: url("coffee_48.png");*/
+            font-size: 16px;
+        }
+    </style>
+    <!-- Download Jquery-->
+    <script type = "text/javascript" 
+      src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.0/jquery.min.js">
+    </script>
+    <!-- Download Zebra Dialog plugin -->
+    <!-- for a specific version -->
+    <script src="https://cdn.jsdelivr.net/npm/zebra_dialog@latest/dist/zebra_dialog.min.js"></script>
+    <!-- for the most recent version of the "flat" theme -->
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/zebra_dialog@latest/dist/css/materialize/zebra_dialog.min.css">
+    <script>
+      $(document).ready(function(){
+        $('#element').on('click', function(e){
+          e.preventDefault();
+          $('#element').attr("disabled","true");
+          new $.Zebra_Dialog('Hai chiesto di riavviare la scheda.<br>'+
+                             'Questo bloccherà il collegamento!!!<br><br>'+
+                             'Sei sicuro?',{                          
+            //attributi della Zebra Dialog
+            custom_class: "myclass",
+            type: "warning",
+            title: "Warning...",
+            modal: false,
+            animation_speed_show: 200,
+            auto_close: 5000,     
+            auto_focus_button: 1,  // autofocus sul tasto "no"     
+            buttons: ["Yes","No"],
+            onClose: function(caption){
+              console.log(this);
+              if(caption=="Yes"){
+                new $.Zebra_Dialog("La scheda si riavvierà..<br>"+
+                                   "Appena il collegamento sarà ripristinato, la scheda sarà nuovamente disponibile", {
+                  auto_close: 4000,
+                  buttons: false,
+                  modal: false,
+                  show_close_button: false,
+                  position: ["right - 20", "bottom - 20"],
+                  onClose: function(){
+                    console.log("reboot");
+                    var request   = new XMLHttpRequest();
+                    request.open("Get", "/reset", false);
+                    request.send();
+                  }
+                });                
+              };
+              $('#element').removeAttr("disabled");
+            }            
+          });
+        });        
+      });
+    </script>    
   </head>
   <body>
-    <iframe id="background" src="https://threejsfundamentals.org/threejs/threejs-responsive.html"></iframe>
+    <!--src="https://threejsfundamentals.org/threejs/threejs-responsive.html"-->
+    <iframe id="background"  ></iframe>
       <h1 class="intestazione"  >--- Setting Page ---</h1>
     <br>
     <br>
@@ -117,7 +187,7 @@
       <p id="boardname" class="boardname" title="Board name">
         Board Name
       </p>           
-      <textarea id="infotextarea" rows="5" cols="50" disabled=true placeholder="info :/" title="Info system area"></textarea>
+      <textarea id="infotextarea" rows="5" cols="50" disabled=true placeholder="info :/  Waiting data ..." title="Info system area"></textarea>
         
       <p id="rssi" class="rssi" title="WiFi signal strength">
       RSSI
@@ -138,7 +208,7 @@
       <form id="formUpload" action="upload" method="post" enctype="multipart/form-data">
          <fieldset style="box-shadow: none;">
             <legend style=" text-align: left; "> SPIFFS Directory </legend>
-            <textarea id="dirtextarea" rows="5" cols="50" disabled=true placeholder="dir :/"></textarea>
+            <textarea id="dirtextarea" rows="5" cols="50" disabled=true placeholder="dir :/ Waiting data ..."></textarea>
         </fieldset>
         <br>
         <fieldset style="box-shadow: none;">
@@ -154,9 +224,11 @@
     <form action="login" method="get">
             <input type="submit" value="Back" class="tasto">
     </form>
+    
     <form action="reset" method="get">
-            <input type="submit" value="RESET" class="tastoRST" disabled="true">
-    </form>  
+            <input type="submit" value="REBOOT" class="tastoRST" id="element" title="Reboot the board!!!">
+    </form> 
+   
     <script>
   	     const form        = document.getElementById('formUpload');
          const fileName    = document.getElementById('filename');
@@ -169,11 +241,11 @@
          const temp        = document.getElementById('temp');
          const humid       = document.getElementById('humid'); 
         
-        
-         var uniqueURL = "/directory";
+         let rateo = 1.57;
+         var uniqueURL = "/directory"; 
         
          refresh();
-         setInterval(refresh, 2000 );
+         setInterval(refresh, 5000 );
         
         function refresh (){
             fetch(uniqueURL).then(function(response) { // get metodo
@@ -192,9 +264,9 @@
                     rssi.textContent     = "RSSI:  " + json['RSSI'] + " db";
                     ssid.textContent     = "SSId:  " + json['SSID'] ;
                     boardName.textContent= "Board: " + json['Board_Name']; 
-                    temp.textContent     = "Temp.: " + json['Temperature'] + "°C";
+                    temp.textContent     = "Temp.: " + json['Temperature'] + '°C';
                     humid.textContent    = "Humid.: " + json['Humidity'] + "%"; 
-
+                    rateo = json["Rateo"];
                     textArea ="Info system: \n";
                     const sysinfo = json['infosys'];  // indico 
                     for (let i = 0; i<sysinfo.length; i++) {
@@ -203,8 +275,9 @@
                         // trova la parola Count 
                         if (sysinfo[i].indexOf('Count')!== -1) { //se il campo è quello giusto (non è diversa) 
                             let stringa= sysinfo[i].slice(7); // metti nella variabile stringa l'ultima parte  
+                            //console.log(String(parseInt(stringa)/(15950000*rateo)*100).slice(0,4));
                             //quindi converti in int, fai i calcoli e metti tutto in strForCount
-                            strForCount = ' (' + String(parseInt(stringa)/159500000*100).slice(0,4)+'%)';
+                            strForCount = ' (' + String(parseInt(stringa)/(15950000*rateo)*100).slice(0,4)+'%)';
                         }
                         if (i===(sysinfo.length-1)) br=""; // se è ultimo elemento non metti il capo linea (-1 perchè parte da 0 l'indice)
                         textArea += sysinfo[i]+strForCount+br;    
