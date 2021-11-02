@@ -1,5 +1,6 @@
 # ESP_8266 Temperature & Humidity project
 <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/birrozza/esp_8266_T-H/total">
+<img alt="GitHub" src="https://img.shields.io/github/license/birrozza/esp_8266_T-H">
 My wireless temperature and humidity sensor needed a case to protect it from the weather. I designed and printed this my idea of  case for this sensor consisting of a Wemos D1 mini card (a clone of it is fine too) and a DHT22 module.
 
 <p>The DHT22 module, thanks to its sensors, can detect the temperature and humidity of the surrounding environment, and send this data to the Wemos board which, thanks to its wifi module, can transmit them to a PC or smartphone.</p>
