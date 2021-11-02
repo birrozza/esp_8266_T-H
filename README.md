@@ -1,7 +1,8 @@
 # ESP_8266 Temperature & Humidity project
-<p align="center">
-<img alt="GitHub all releases" src="https://img.shields.io/github/downloads/birrozza/esp_8266_T-H/total">
+<p>
 <img alt="GitHub" src="https://img.shields.io/github/license/birrozza/esp_8266_T-H">
+<img alt="GitHub all releases" src="https://img.shields.io/github/downloads/birrozza/esp_8266_T-H/total">
+
 </p>
 My wireless temperature and humidity sensor needed a case to protect it from the weather. I designed and printed this my idea of  case for this sensor consisting of a Wemos D1 mini card (a clone of it is fine too) and a DHT22 module.
 
