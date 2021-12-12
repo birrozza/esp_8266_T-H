@@ -60,12 +60,17 @@ Below, in the <strong>File Manager</strong> section, you have the image of the <
 <h3><strong>+++ NEWS +++</strong></h3>
 
 <h2><strong>Enabled a Telegram bot to be able to interrogate the sensor. </strong></h2>
-First of all you need to create a bot on the Telegram with <b>BothFather</b> function. The procedure can be found at this.
+First of all you need to create a bot on the Telegram with <b>BothFather</b> function. The procedure 
+can be found at this <a href="https://core.telegram.org/bots#6-botfather">link</a>.
+
+Obtained the token of our new bot, it must be inserted in the <b>secret.h</b> file
+
 Through the bot, you can interrogate the sensor with commands:
-- <b>read</b>:  returns the latest temperature and humidity reading;
-- <b>wifi</b>:  returns the parameters of the wifi connection;
-- <b>stato</b>: returns the last status of the data transmission to ThingSpeak.
- 
+<ul>
+    <li><b>read</b>:  returns the latest temperature and humidity reading;</li>
+    <li><b>wifi</b>:  returns the parameters of the wifi connection;</li>
+    <li><b>stato</b>: returns the last status of the data transmission to ThingSpeak.</li>
+</ul> 
 [link](https://core.telegram.org/bots#6-botfather).
 Obtained the token of our new bot, it must be inserted in the <b>secret.h</b> file
 
