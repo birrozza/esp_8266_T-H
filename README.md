@@ -66,18 +66,15 @@ In fact, in the file we find the following fields and modifiable sub fields:
    - <b>"type"</b>: the type of card (ESP8266);
    - <b>"local_host_name"</b>: the host name of the card to connect to with your browser;
    - <b>"rateo"</b>: constant used to vary the time between one reading and another.
-<br>
-<br>
+
 - <b>"login"</b>:
     - <b>"user"</b>: user;
     - <b>"password"</b>: password.
-<br>
-<br>
+
 - <b>"location"</b>:
     - <b>"city"</b>: the name of the city where the sensor is installed;
     - <b>"country"</b>: the name of the country where the sensor is installed.
-<br>
-<br>
+
 - <b>"field_1"</b> & <b>"field_2"</b>:
     - <b>"name"</b>:it must remain unchanged;
     - <b>"url"</b>:Thingspeak channel fields URL.
