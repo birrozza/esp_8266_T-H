@@ -36,7 +36,7 @@ In this case, thanks to code inside (sketch), the data is sent to a web platform
 </blockquote>
 <h3>Software istruction</h3>
 
-<p>First you need to register the service (free but with some limitations) here:  <a href="https://thingspeak.com">www.thingspeak.com</a>
+<p>First you need to register the service (free but with some limitations) here:  <a href="https://thingspeak.com">www.thingspeak.com</a>. 
 The <b>channel ID</b> parameter and <b>API token</b> parameter must both be entered in <b>secret.h</b> file.
 <br> 
 
@@ -60,7 +60,11 @@ Below, in the <strong>File Manager</strong> section, you have the image of the <
 <h3><strong>+++ NEWS +++</strong></h3>
 
 <h2><strong>Enabled a Telegram bot to be able to interrogate the sensor. </strong></h2>
-First of all you need to create a bot on the Telegram with <b>BothFather</b> function. The procedure can be found at this 
+First of all you need to create a bot on the Telegram with <b>BothFather</b> function. The procedure can be found at this.
+Through the bot, you can interrogate the sensor with commands:
+- <b>read</b>:  returns the latest temperature and humidity reading;
+- <b>wifi</b>:  returns the parameters of the wifi connection;
+- <b>stato</b>: returns the last status of the data transmission to ThingSpeak.
  
 [link](https://core.telegram.org/bots#6-botfather).
 Obtained the token of our new bot, it must be inserted in the <b>secret.h</b> file
