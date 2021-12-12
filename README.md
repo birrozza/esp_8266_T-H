@@ -57,13 +57,40 @@ ESP will try to connect. If successful, it relinquishes control back to your app
 On the <strong>setting page</strong> you can find different values, such as the <strong>IP address</strong> of the card, its <strong>ID name</strong>, the name of the <strong>wi-fi</strong> network and its power (<strong>RSSI</strong>), and other specific card data.
 Below, in the <strong>File Manager</strong> section, you have the image of the <strong>SPIFFS</strong> and further down, you have the possibility to update the Html files as well as upload new ones.
 
+<h3>Configuration</h3>
+
+Through the <b>config.json</b> file it is possible to configure the program.
+In fact, in the file we find the following fields and modifiable sub fields:
+- <b>"board"</b>:
+   - <b>"board_id"</b>: the identification name of the card;
+   - <b>"type"</b>: the type of card (ESP8266);
+   - <b>"local_host_name"</b>: the host name of the card to connect to with your browser;
+   - <b>"rateo"</b>: constant used to vary the time between one reading and another.
+<br>
+<br>
+- <b>"login"</b>:
+    - <b>"user"</b>: user;
+    - <b>"password"</b>: password.
+<br>
+<br>
+- <b>"location"</b>:
+    - <b>"city"</b>: the name of the city where the sensor is installed;
+    - <b>"country"</b>: the name of the country where the sensor is installed.
+<br>
+<br>
+- <b>"field_1"</b> & <b>"field_2"</b>:
+    - <b>"name"</b>:it must remain unchanged;
+    - <b>"url"</b>:Thingspeak channel fields URL.
+
+The other fields are not currently used.
+
 <h3><strong>+++ NEWS +++</strong></h3>
 
-<h2><strong>Enabled a Telegram bot to be able to interrogate the sensor. </strong></h2>
+<h2><strong>Enabled a Telegram bot to be able to interrogate the sensor </strong></h2>
 First of all you need to create a bot on the Telegram with <b>BothFather</b> function. The procedure 
 can be found at this <a href="https://core.telegram.org/bots#6-botfather">link</a>.
 
-Obtained the token of our new bot, it must be inserted in the <b>secret.h</b> file
+Obtained the token of our new bot, it must be inserted in the <b>secret.h</b> file.
 
 Through the bot, you can interrogate the sensor with commands:
 <ul>
