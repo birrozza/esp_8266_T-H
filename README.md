@@ -40,7 +40,7 @@ In this case, thanks to code inside (sketch), the data is sent to a web platform
 <br> 
  So,  download the code for Arduino from the <a href="https://github.com/birrozza/esp_8266_T-H">link</a> above.
 <br>
-With the Arduino IDE, you must enter in the <b>_secret.h_</b> file and update the <em><strong>Channel ID</em></strong> and the <em><strong>Channel Write Key</strong></em> values whith obtained when the service was activated on Thingspeak.</p>
+With the Arduino IDE, you must enter in the <b><em>secret.h</em></b> file and update the <em><strong>Channel ID</em></strong> and the <em><strong>Channel Write Key</strong></em> values whith obtained when the service was activated on Thingspeak.</p>
 
 In this project, in addition to managing the DHT22 sensor, the Wemos card also acts as a <strong>web-server</strong>. For this purpose, <strong>web pages</strong> have been created which function as a user interface. These must be loaded into the SPIFFS of the ESP8266. Here the plug-in about it [ESP8266 Sketch Data Upload](https://github.com/esp8266/arduino-esp8266fs-plugin)
 
@@ -93,9 +93,9 @@ Obtained the token of our new bot, it must be inserted in the <b>_secret.h_</b> 
 
 Through the bot, you can interrogate the sensor with commands:
 <ul>
-    <li><b>"read"</b>:  returns the latest temperature and humidity reading;</li>
-    <li><b>"wifi"</b>:  returns the parameters of the wifi connection;</li>
-    <li><b>"stato"</b>: returns the last status of the data transmission to ThingSpeak.</li>
+    <li><b>"<em>read</em>"</b>:  returns the latest temperature and humidity reading;</li>
+    <li><b>"<em>wifi</em>"</b>:  returns the parameters of the wifi connection;</li>
+    <li><b>"<em>stato</em>"</b>: returns the last status of the data transmission to ThingSpeak.</li>
 </ul> 
 <br>
 <strong>Stay tuned!!! (last update december 2021)</strong>
