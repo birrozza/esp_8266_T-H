@@ -90,7 +90,7 @@
                 border-radius: 10px;
                 cursor: default;                
             }            
-            .container-temFrame {
+            .container-temFrame, .container-humFrame {
                 /*overflow: hidden;
                 /*border: 1px solid #4a2bd1;*/
                 width: 450px;
@@ -101,13 +101,7 @@
                 /*width: 100%;*/
                 /*height: 100%;               
             } */
-            .container-humFrame{
-                /*overflow: hidden;
-                /*border: 1px solid #4a2bd1;*/
-                width: 450px;
-                height: 260px;
-                z-index: 2;
-            }/*
+            /*
             .resp-humFrame {
                 /*width: 100%;
                 height: 100%;
@@ -161,14 +155,14 @@
                 <div class=" position-absolute eclips2"></div>            
                 <div class=" position-absolute eclips4"></div>        
                 <div class=" position-absolute eclips5"></div>   -->
+                <!-- ip adress -->
                 <div class="container">
-                    <div class="row justify-content-md-center m-2"> 
-                        <!-- ip adress --> 
-                        <h1 class="ipAdress text-center col-md-auto g-3 animate__animated animate__flipInY" id="idBouton" style="color: green;" placeholder = "Waiting data..." onclick="nascondiHeaderOut()">%IP_ADRESS%</h1>
+                    <div class="row justify-content-md-center m-2">                         
+                        <h1 class="ipAdress text-center col-md-auto g-3 animate__animated animate__fadeInUpBig" id="idBouton" style="color: green;" placeholder = "Waiting data..." onclick="nascondiHeaderOut()">%IP_ADRESS%</h1>
                     </div>
                 </div>
-                <div class="container ">
-                    <!-- heder -->
+                <!-- header -->
+                <div class="container">                    
                     <div class="row justify-content-md-center m-2 animate__animated animate__lightSpeedInRight">   
                         <header id = "head" class="text-center  " disabled="true">                         
                         :: Temperature & Humidity in:    waiting data .... ::
@@ -178,7 +172,7 @@
                 <!-- iframe --> 
                 <div class="container">                   
                         <div class = "row shadow m-3 justify-content-sm-center"> 
-                            <div   class = "container-temFrame col-sm-6 m-3 ratio ratio-1x1"> <!-- width="450" height="260" -->
+                            <div   class = "container-temFrame col-sm-6 m-3 ratio ratio-1x1"> 
                                 <iframe  id = "temFrame" class = "_resp-temFrame" style="border: 1px solid #cccccc;"  placeholder = "Waiting data..." src="https://thingspeak.com/channels/867219/charts/1?bgcolor=%23ffffff&amp;color=%23d62020&amp;dynamic=true&results=60&title=Temperatura&type=line&xaxis=Data">
                                 </iframe>
                             </div> 
@@ -190,17 +184,16 @@
                 </div>   
                 <!-- autore -->
                 <div class="container">    
-                    <div class = "aut text-center  mt-5  animate__animated animate__bounceInDown" title="Autore Angelo MIRABELLI. Try to click on" onclick="nascondiHeader()">Powered by   A. Mirabelli</div>    
+                    <div class="aut text-center  mt-5  animate__animated animate__bounceInDown" title="Autore Angelo MIRABELLI. Try to click on" onclick="nascondiHeaderIn()">Powered by   A. Mirabelli</div>    
                 </div>
                 <!-- tasto -->
                 <div class="container">
-                    <div class = " row text-center "  >
-                            <form action="setpage" method="get">
-                                <button class="pulsante btn btn-light mb-3" type="submit" title="To Setting page">Setting</button>                       
-                            </form> 
+                    <div class="row text-center">
+                        <form action="setpage" method="get">
+                            <button class="pulsante btn btn-light mb-3" type="submit" title="To Setting page">Setting</button>                       
+                        </form> 
                     </div>
-                </div>
-                
+                </div>                
             </div>
             <div class="log animate__animated" id="logElement"></div>
         </div>
@@ -227,15 +220,16 @@
                 console.log(json);
                 ipAdress.textContent = "Fetch problem!!!";
             });
-            function nascondiHeader(){
+            function nascondiHeaderIn(){
                 head.className +="animate__animated animate__flipOutX";
                 logElement.textContent="Click on Ip Adress";
-                logElement.classList.add("animate__flash");                
+                logElement.classList.remove("animate__hinge");
+                logElement.classList.add("animate__fadeInBottomRight");                
             }
             function nascondiHeaderOut(){
                 head.className +="animate__animated animate__fadeInTopLeft";
-                logElement.textContent="";                
-                logElement.classList.remove("animate__flash");
+                logElement.classList.add("animate__hinge");                
+                logElement.classList.remove("animate__fadeInBottomRight");
             }
         </script>
     <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>-->

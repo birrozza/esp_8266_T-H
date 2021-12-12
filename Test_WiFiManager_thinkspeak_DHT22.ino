@@ -1,46 +1,58 @@
-// per ESP8266 clone WeMos D1 R1 usare WeMos D1 R1
-
-#include "ESPAsyncTCP.h"
-#include "ESPAsyncWebServer.h"
-//#include <ArduinoJson.h>
-#include "ESP8266WiFi.h"
-//needed for library
-#include <FS.h>
-#include "ESPAsyncWiFiManager.h"
-#include "ESP8266mDNS.h"        // Include the mDNS library
-#include "ThingSpeak.h"
-#include <ESP8266HTTPClient.h>
-#include "Ticker.h"
+/* ------------- MEMO -----------------
+  - per ESP8266 clone WeMos D1 R1 usare LOLIN(WeMos) D1 R1
+  - esp core 3.0.2 funzionante con telegram https://github.com/esp8266/Arduino
+  - driver esp8266 http://www.wch.cn/download/CH341SER_ZIP.html
+*/
+#include "ESP8266WiFi.h"        // library ESP8266 Arduino Core (ver 3.0.2)
+#include "Ticker.h"             // library ESP8266 Arduino Core (ver 3.0.2)
+#include "ESP8266mDNS.h"        // library ESP8266 Arduino Core (ver 3.0.2)
+#include <FS.h>                 // library ESP8266 Arduino Core (ver 3.0.2)
+#include "ESPAsyncTCP.h"        // https://github.com/me-no-dev/ESPAsyncTCP
+#include "ESPAsyncWebServer.h"  // https://github.com/me-no-dev/ESPAsyncWebServer
+#include "ESPAsyncWiFiManager.h"// WifiManager 2.0.3 alpha
+#include "AsyncTelegram.h";     // ver 1.1.3
+#include <ArduinoJson.h>        // ver 6.15.1
+#include "ThingSpeak.h"         // ver 1.5.0
+#include <math.h>
 
 #include "utility.h"
-#include "secret.h"   // 
+#include "C:\Users\computer\Desktop\esp8266 sketch\secret.h"   // always comment on this line (for development only) 
+//#include "secret.h" // uncomment if it's commented out
 #include "sensore_DHT_22.h"     //  
 #include "testiHTML.h" // la sintassi HTML con indentazione leggibile
 #include "letturaSPIFFS.h"
 
 //// variabili
-
 unsigned long  myChannelNumber = SECRET_CH_ID;
 const char     * myWriteAPIKey = SECRET_WRITE_APIKEY;
+const char* token = SECRET_TELEGRAM_BOT_TOKEN;
 WiFiClient     client;
 String         boardName;
+String         password;
+String         user;
+String         hostName="myesp";
 AsyncWebServer server(80);
 DNSServer      dns;
 sensors_event_t event;
+float lastTemperatureRead = 0.0;
+float lastHumidityRead = 0.0;
+AsyncTelegram myBot;
+TBMessage msg;
+String stato=" ESP start";
+String statoIp=stato; 
+float rateo = 1.57; // costante per regolare l'intervallo delle letture
 
 //for LED status
 Ticker ticker;
-int count=148000000;
+int count=14800000 * rateo; 
 
   // function prototypes for HTTP handlers
 void dirRequest (AsyncWebServerRequest *request);
 void handleLogin(AsyncWebServerRequest *request);
+void handleIpRequest(AsyncWebServerRequest *request);
 void handleFileUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final); 
 
-
-
 //// metodi
- 
 void tick() {
   //toggle state
   int state = digitalRead(BUILTIN_LED);
@@ -60,7 +72,27 @@ void configModeCallback (AsyncWiFiManager  *myWiFiManager) {
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
-   
+
+  SPIFFS.begin();                           // Start the SPI Flash Files System
+  String a=letturaSPIFFS();   /// variabile inutilizzata
+  File txtFile = SPIFFS.open(F("/config.json"),"r"); // apri il file di configurazione
+  String configuration = txtFile.readString();
+  txtFile.close(); // chiudi il file
+  Serial.println("\nConfiguration file uploaded!!!\n");
+  
+  DynamicJsonDocument doc(1024);
+  deserializeJson(doc, configuration);
+
+  boardName = String(doc["board"]["board_id"]);
+  hostName = String(doc["board"]["local_host_name"]);
+  user = String(doc["login"]["user"]);
+  password = String(doc["login"]["password"]);
+  rateo = float(doc["board"]["rateo"]);
+  
+  //myChannelNumber = (doc["thinkspeak"]["id"]);
+  //myWriteAPIKey = (doc["thinkspeak"]["api_key"]);
+  //const char* token = (doc["Telegram_bot"]["token"]);
+    
   //set led pin as output
   pinMode(BUILTIN_LED, OUTPUT);
   // start ticker with 0.5 because we start in AP mode and try to connect
@@ -69,6 +101,7 @@ void setup() {
   //WiFiManager
   //Local intialization. Once its business is done,
   //there is no need to keep it around
+  WiFi.persistent(true);
   AsyncWiFiManager wifiManager(&server,&dns);
   //reset settings - for testing
   //wifiManager.resetSettings();
@@ -108,17 +141,20 @@ void setup() {
   server.on("/login",     HTTP_GET , [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/login.html", "text/html");
   });
+  /*
   server.on("/iprequest", HTTP_POST, [](AsyncWebServerRequest *request) {
     String ip="IP "+WiFi.localIP().toString();
     Serial.println(ip);
     request->send(200, "text/html", ip);
   });
+  */
+  server.on("/iprequest", HTTP_GET, handleIpRequest);
   server.on("/setpage", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/setting.html","text/html");   
   });
   server.on("/reset", HTTP_GET, [](AsyncWebServerRequest *request) { // chiedi il reset
     request->send(SPIFFS, "/index.html", "text/html");  
-    ESP.reset();
+    ESP.restart();
   });
   server.on("/directory", HTTP_GET,  dirRequest);
   server.on("/upload", HTTP_POST, [](AsyncWebServerRequest *request){
@@ -128,8 +164,7 @@ void setup() {
   server.onNotFound([](AsyncWebServerRequest *request){
     request->send(404, "text/html", sitoNonTrovato);  
   });
- 
-  
+   
   server.begin();                           // Actually start the server
   Serial.println("HTTP server started");
 
@@ -149,7 +184,7 @@ void setup() {
     Serial.println("dnsserver partito");
 */  
 
-   if (!MDNS.begin("myesp", WiFi.localIP(),3600)) {             // Start the mDNS responder for esp8266.local
+   if (!MDNS.begin(hostName, WiFi.localIP(),3600)) {             // Start the mDNS responder for myesp.local
         Serial.println("Error setting up MDNS responder!");
   }
   Serial.println("mDNS responder started");
@@ -158,23 +193,52 @@ void setup() {
   WiFi.mode(WIFI_STA);
 
   ThingSpeak.begin(client);
-  SPIFFS.begin();                           // Start the SPI Flash Files System
-  String a=letturaSPIFFS();   /// variabile inutilizzata
+  //SPIFFS.begin();                           // Start the SPI Flash Files System
+  //String a=letturaSPIFFS();   /// variabile inutilizzata
+
+  /*   
   File txtFile = SPIFFS.open(F("/board.txt"),"r"); // apri il file board.txt dove c'è il nome della board
   boardName = txtFile.readString();
   Serial.println(boardName); // stampala sulla console
   txtFile.close(); // chiudi il file
+  */
+  
   sensore_DHT_22(); //setup del sensore
+
+  /*
+  File txtFile = SPIFFS.open(F("/config.json"),"r"); // apri il file board.txt dove c'è il nome della board
+  String configuration = txtFile.readString();
+  //Serial.println(configuration); // stampala sulla console
+  txtFile.close(); // chiudi il file
+
+  DynamicJsonDocument doc(1024);
+  deserializeJson(doc, configuration);
+
+  boardName = String(doc["board"]["board_id"]);
+  //const char* token = doc["telegram_bot"]["token"];
+  */
+  
+  // Set the Telegram bot properies
+  myBot.setClock("CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00");  //CET-1CEST,M3.5.0,M10.5.0/3
+  myBot.setUpdateTime(2000);
+  myBot.setTelegramToken(token);
+  // Check if all things are ok
+  Serial.print("\nTest Telegram connection... ");
+  //myBot.begin() ? Serial.println("Telegram OK") : Serial.println("Telegram NO OK");
+  if (myBot.begin()){
+    Serial.println("Telegram OK");
+    //alla fine mandi un messaggio al bot telegram dopo un'attesa di 2 sec
+    delay(2000);
+    String replay = "Avvio " + boardName;
+    myBot.sendMessage(msg, replay);
+  } else {
+    Serial.println("Telegram NO OK");
+  }
   
 } // end setup
 
-String stato=" ESP start, ";
-String statoIp=stato; 
-
 void loop() {
   
- // put your main code here, to run repeatedly:
- 
   MDNS.update();
   //sensors_event_t event;
 
@@ -183,27 +247,28 @@ void loop() {
   if (stato!="---") statoIp=stato; // conserva l'ultimo stato utile da riportare sul web
     else statoIp="All ok";
   
-  if (count==150000000){  // 5 milioni sono circa 1 minuto (150.000.000
+  if (count==(15000000 * rateo)){  // 5 milioni sono circa 1 minuto (150.000.000
                         //50 milioni sono circa 10 minuti   
     
     dht.temperature().getEvent(&event);
     if (isnan(event.temperature)) {
       Serial.println(F("Error reading temperature!"));
       stato=stato+" Error reading temperature";
-      count-=20000;
+      count-=2000 * rateo;
     } else {
       Serial.print(F("Temperatura: "));
       Serial.print(event.temperature);
       Serial.println(F("°C"));
       // Write value to Field 1 of a ThingSpeak Channel
       ThingSpeak.setField(1, event.temperature);
+      lastTemperatureRead = event.temperature;
     }
   }    
-  if (count==150500000) {  
+  if (count==(15050000 * rateo)) {  
     dht.humidity().getEvent(&event);
     if (isnan(event.relative_humidity)) {
       Serial.println(F("Error reading humidity!"));
-      count-=20000;
+      count-=2000 * rateo;
       stato=stato+" Error reading humidity";
     } else {
       float hum=event.relative_humidity;//0.9-34.6; // per calibrare il valore dell'umidità
@@ -215,9 +280,10 @@ void loop() {
       stato=stato+" Read ok";
       ThingSpeak.setStatus(stato);
       stato="---"; // azzera lo stato
+      lastHumidityRead = hum;
     } 
   }
-  if (count==159500000) {  // garantisce una lettura quasi ogni 30 minuti
+  if (count>=(15950000 * rateo)) {  // garantisce una lettura quasi ogni 30 minuti
     int x = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
     if(x == 200){
       Serial.println("Channel update successful.");
@@ -226,14 +292,62 @@ void loop() {
     } else {
       Serial.println("Problem updating channel. HTTP error  " + msgFeedBack(x)); 
       stato=stato+"*** Problem updating channel last time. HTTP error " + msgFeedBack(x)+" --- "; 
-      count=140000000; // se ci sono problemi nell'aggiornamento dei dati, fa tutto nuovamente
+      count=14000000 * rateo; // se ci sono problemi nell'aggiornamento dei dati, fa tutto nuovamente
     }
   }
   count++;
+  
+  //telegram step
+  
+  if (myBot.getNewMessage(msg)) { //se è presente un messaggio
+    if (msg.text.equalsIgnoreCase("read")) {
+      String replay = "Ciao " + String(msg.sender.firstName) + "!!!\nGli ultimi dati letti:";
+      replay += "\nLast temperature: " + String(lastTemperatureRead) + "°C";
+      replay += "\nLast humidity: " + String(lastHumidityRead) + "%";
+      double s = lastTemperatureRead - 37.25*(2 - log10(double(lastHumidityRead)));
+      replay += "\nDev point: " + String(s); 
+      myBot.sendMessage(msg, replay );
+    } // read
+    else if (msg.text.equalsIgnoreCase("wifi")){
+      String replay = "SSID: "+WiFi.SSID()+"\nRSSI: " +WiFi.RSSI()+"\nIP: " + WiFi.localIP().toString()+"\nLocal host: "+hostName+"\nBoard: "+boardName;
+      myBot.sendMessage(msg, replay);
+    } // wifi
+    else if (msg.text.equalsIgnoreCase("stato")){
+      String replay = "Stato: " + stato;
+      myBot.sendMessage(msg, replay);
+    } // stato
+    else {
+      String replay = "Ciao!!! \nScelte disponibili:\n- read -> temp & Humidity;\n- wifi -> wifi status;\n- stato -> stato.";
+      myBot.sendMessage(msg, replay);
+    }
+  } // end telegram bot
 } // end loop
 
 ///////// WEB SERVER metod ///////////////////
 
+void handleIpRequest(AsyncWebServerRequest *request){ // invia json con ip, city, country e url_fields
+  
+  StaticJsonDocument <1024> rispostaJson; //creazione del json di risposta
+  DynamicJsonDocument doc(1024); // creazione del contenitore per il json di configurazione
+  String json;
+  // carica il file config.json
+  File txtFile = SPIFFS.open(F("/config.json"),"r"); // apri il file config.json dove c'è la configurazione
+  String configuration = txtFile.readString(); //metti nella stringa tutto il testo scaricato
+  txtFile.close(); // chiudi il file
+  
+  deserializeJson(doc, configuration); // da stringa scaricata a json
+  
+  rispostaJson["ip"] = WiFi.localIP().toString();
+  rispostaJson["city"] = doc["location"]["city"];
+  rispostaJson["country"] = doc["location"]["country"];
+  rispostaJson["temp"] = doc["thinkspeak"]["field_1"]["url"];
+  rispostaJson["humi"] = doc["thinkspeak"]["field_2"]["url"];
+  
+  serializeJson(rispostaJson, json); // da json a stringa per l'invio
+  //Serial.print('json: ' + json);
+  request->send(200, "text/json", json); //invia json
+
+}
 
 void handleLogin(AsyncWebServerRequest *request) {                         // If a POST request is made to URI /login
   Serial.println("in handlelogin");
@@ -242,7 +356,7 @@ void handleLogin(AsyncWebServerRequest *request) {                         // If
     request->send(400, "text/html", invalidRequest);         // The request is invalid, so send HTTP status 400
     return;
   }
-  if(request->arg("username") == "Heineken" && request->arg("password") == "password123") { // If both the username and the password are correct
+  if(request->arg("username") == user && request->arg("password") == password) { // If both the username and the password are correct
     
     request->send(SPIFFS, "/login.html");
     } else {                                                                              // Username and password don't match
@@ -265,66 +379,87 @@ void handleFileUpload(AsyncWebServerRequest *request, String filename, size_t in
     Serial.println((String)"UploadEnd: " + filename + "," + index+len);
     // close the file handle as the upload is now done
     request->_tempFile.close();
-    
-    //request->send(200, "text/plain", "File Uploaded !");
+    // prima di rimandare alla pagina setpage
+    Serial.println(filename);
+    if(filename=="config.json"){ //se il file caricato è quello di configurazione
+        Serial.println("in");
+        //** carico in un json il file di configurazione **//
+        DynamicJsonDocument fileConfig(1024); // creazione del contenitore per il json di configurazione
+        File txtFile = SPIFFS.open(F("/config.json"),"r"); // apri il file config.json dove c'è la configurazione
+        String configuration = txtFile.readString(); //metti nella stringa tutto il testo scaricato
+        txtFile.close(); // chiudi il file
+        deserializeJson(fileConfig, configuration); // da stringa scaricata a json
+        //aggiorno i parametri sensibili
+        boardName = String(fileConfig["board"]["board_id"]);
+        String newHostName = String(fileConfig["board"]["local_host_name"]);
+        rateo = float(fileConfig["board"]["rateo"]);
+        user = String(fileConfig["login"]["user"]);
+        password = String(fileConfig["login"]["password"]);
+        if (newHostName!=hostName){
+          hostName=newHostName;
+          MDNS.end();
+          if (!MDNS.begin(hostName, WiFi.localIP(),3600)) {             // Start the mDNS responder for myesp.local
+            Serial.println("Error setting up MDNS responder!");
+          }  
+        }  
+      }    
     request->redirect("/setpage");
   } 
-  /* blocca la scheda
-  if (filename == "/board.txt") {// ora  leggi dal file board.txt il nome della scheda qualora sia stato fatto l'upload di questo file
-    File txtFile = SPIFFS.open(F("/board.txt"),"r"); // apri il file board.txt dove c'è il nome della board
-    boardName = txtFile.readString();
-    txtFile.close(); // chiudi il file
-  }*/
 }
 
 void dirRequest (AsyncWebServerRequest *request){
-// {"dir": [{"file": ["filename","size"]},{"file":["filename","size"]}]}    
-// per la verifica del json>>>>    https://filosophy.org/code/fixing-syntaxerror-unexpected-string-token-in-json-at-position/ 
-// oppure                  >>>>    http://jsonviewer.stack.hu/
+    // per la verifica del json>>>>    https://filosophy.org/code/fixing-syntaxerror-unexpected-string-token-in-json-at-position/ 
+    // oppure                  >>>>    http://jsonviewer.stack.hu/
+    String json;
     
-    String json = "{\"dir\": [";
-/// comncia a popolare il json   
+    //creo il json da inviare
+    StaticJsonDocument <2048> doc; /// per creare il json di risposta
+    JsonArray dir_json = doc.createNestedArray("dir");
+    
     Dir dir = SPIFFS.openDir("/");
+    int x = 0;
     while (dir.next()) {
         // get filename
-        json+="{\"file\": [\""+ dir.fileName()+"\",";
+        JsonArray dir_file = dir_json[x++].createNestedArray("file");
+        dir_file.add(String(dir.fileName()));
+        
         // If element have a size display It else write 0
         if(dir.fileSize()) {
             File f = dir.openFile("r");
-            json+="\""+ String(f.size())+"\"]},";
+            dir_file.add(String(f.size()));
+            //json+="\""+ String(f.size())+"\"]},";
             f.close();
         }else{
-            json+="\"0\"]},";
+            dir_file.add("0");
+            //json+="\"0\"]},";
         }
     }
-    json.remove(json.length()-1,1); // togli la virgola
-    json+="], \"ip\": \"" + WiFi.localIP().toString()+"\","; // inserisce nel json l'indirizzo ip e ci mette la virgola per il prossimo elemento
-
-/// inseriamo nel json i datitecnici della scheda
+    doc["ip"] = WiFi.localIP().toString();
+    /// inseriamo nel json i datitecnici della scheda
     FSInfo fs_info;
     SPIFFS.info(fs_info);
-    json+="\"infosys\": [\"Total Space:     " + String(fs_info.totalBytes)    + " byte\", ";
-    json+=              "\"Space Used:      " + String(fs_info.usedBytes)     + " byte\", ";
-    json+=              "\"Block Size:      " + String(fs_info.blockSize)     + " byte\", ";
-    json+=              "\"Page Size:       " + String(fs_info.totalBytes)    + " byte\", ";
-    json+=              "\"Max open files:  " + String(fs_info.maxOpenFiles)  + " files\", ";
-    json+=              "\"Max path lenght: " + String(fs_info.maxPathLength) + "\", ";
-    json+=              "\"Count:           " + String(count)                 + "\", "; // inserisco il conteggio per la lettura
-    json+=              "\"Stato:           " + statoIp                         + "\"]"; // inserisco stato
+    JsonArray infosys = doc.createNestedArray("infosys");
+    infosys.add(String("Total Space:     " + String(fs_info.totalBytes)    + " byte"));
+    infosys.add(String("Space Used:      " + String(fs_info.usedBytes)     + " byte"));
+    infosys.add(String("Block Size:      " + String(fs_info.blockSize)     + " byte"));
+    infosys.add(String("Page Size:       " + String(fs_info.totalBytes)    + " byte"));
+    infosys.add(String("Max open files:  " + String(fs_info.maxOpenFiles)  + " files"));
+    infosys.add(String("Max path lenght: " + String(fs_info.maxPathLength)));
+    infosys.add(String("Count:           " + String(count)));
+    infosys.add(String("Rateo:           " + String(rateo)));
+    infosys.add(String("Status:          " + statoIp + ""));
+    doc["RSSI"] = String(WiFi.RSSI());
+    doc["SSID"] = String(WiFi.SSID());
+    doc["Board_Name"] = boardName;
+    doc["Temperature"] = String(lastTemperatureRead);
+    doc["Humidity"] = String(lastHumidityRead);
+    doc["Rateo"] = rateo;
+    doc["Host_name"] = hostName;
+    doc["Count"]= count;
+    //doc["bot"] = myBot.begin(); //inchioda la scheda
+    //doc["City"] = "Taranto (Italy)";
     
-    json+=", \"RSSI\": \""+ String(WiFi.RSSI())+"\""; // inserisco nel json il valore del segnale wifi
-
-    json+=", \"SSID\": \""+ String(WiFi.SSID())+"\""; // inserisco nel json il nome del ssid
-    
-    json+=", \"Board_Name\": \"" + boardName + "\""; // inserisco il nome identificativo della scheda letto dal file board.txt
-
-   // json+=", \"Temperature\": \"" + temperatureRead(event) + "\"";
-
-   //    json+=", \"Humidity\": \"" + humidityRead(event) + "\"";
-        
-    json+="}"; // chiude il json
-    //Serial.println("in dirRequest, json= "+ json);
-    Serial.println("StatoIp -> "+ statoIp);
+    serializeJson(doc, json);
     request->send(200, "text/json", json);
 }
 
@@ -369,5 +504,8 @@ void dirRequest (AsyncWebServerRequest *request){
   ],
   "RSSI": "-83",
   "SSID": "FASTWEB-F31559",
-  "Board_Name": "esp_aef385"
+  "Board_Name": "esp_aef385", oppure "esp-bd13a8"
+  "Temperature": "28,9",
+  "Humidity": "68,9",
+  
 }*/

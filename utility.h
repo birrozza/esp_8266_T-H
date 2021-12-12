@@ -2,6 +2,7 @@ String msgFeedBack(int httpCode) { /// diagnostica: codici d'errore ThinkSpeak
 
   switch (httpCode) {
     case  200: return String("Code (200) OK / Success");
+    case  400: return String("Code (400) The request cannot be fulfilled due to bad syntax");
     case  404: return String("Code (404) Incorrect API key (or invalid ThingSpeak server address)");
     case -101: return String("Code (-101) Value is out of range or string is too long (> 255 characters)");
     case -201: return String("Code (-201) Invalid field number specified");
@@ -15,11 +16,11 @@ String msgFeedBack(int httpCode) { /// diagnostica: codici d'errore ThinkSpeak
     default  : return String("Codice non identificato!!! ("+String(httpCode)+")!!!");
   }
 }
-
-void aggStato() {
+/*
+void aggStato(client) {
   HTTPClient http;    //Declare object of class HTTPClient
   //https://api.thingspeak.com/update.json?api_key=F32EPARZLNSE4W0K&status=test
-  http.begin("https://api.thingspeak.com/update.json");      //Specify request destination
+  http.begin(client,"https://api.thingspeak.com/update.json");      //Specify request destination
   http.addHeader("Content-Type", "text/plain");  //Specify content-type header
   int httpCode = http.POST("?api_key=F32EPARZLNSE4W0K&status=test");   //Send the request
   String payload = http.getString();                  //Get the response payload
@@ -29,3 +30,4 @@ void aggStato() {
  
    http.end();  //Close connection
 }
+*/
