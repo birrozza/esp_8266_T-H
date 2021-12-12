@@ -37,12 +37,10 @@ In this case, thanks to code inside (sketch), the data is sent to a web platform
 <h3>Software istruction</h3>
 
 <p>First you need to register the service (free but with some limitations) here:  <a href="https://thingspeak.com">www.thingspeak.com</a>. 
-The <b>channel ID</b> parameter and <b>API token</b> parameter must both be entered in <b>secret.h</b> file.
 <br> 
-
  So,  download the code for Arduino from the <a href="https://github.com/birrozza/esp_8266_T-H">link</a> above.
 <br>
-With the Arduino IDE, you must enter in the <strong>secret.h</strong> file and update the <em><strong>Channel ID</em></strong> and the <em><strong>Channel Write Key</strong></em> values whith obtained when the service was activated on Thingspeak.</p>
+With the Arduino IDE, you must enter in the <b>_secret.h_</b> file and update the <em><strong>Channel ID</em></strong> and the <em><strong>Channel Write Key</strong></em> values whith obtained when the service was activated on Thingspeak.</p>
 
 In this project, in addition to managing the DHT22 sensor, the Wemos card also acts as a <strong>web-server</strong>. For this purpose, <strong>web pages</strong> have been created which function as a user interface. These must be loaded into the SPIFFS of the ESP8266. Here the plug-in about it [ESP8266 Sketch Data Upload](https://github.com/esp8266/arduino-esp8266fs-plugin)
 
@@ -59,28 +57,29 @@ Below, in the <strong>File Manager</strong> section, you have the image of the <
 
 <h3>Configuration</h3>
 
-Through the <b>config.json</b> file it is possible to configure the program.
+Through the <b>_config.json_</b> file it is possible to configure the program.
 In fact, in the file we find the following fields and modifiable sub fields:
 
-*  <b>"board"</b>:
-    *  <b>"board_id"</b>: the identification name of the card;
-    *  <b>"type"</b>: it must remain unchanged;
-    *  <b>"local_host_name"</b>: the host name of the card to connect to with your browser;
-    *  <b>"rateo"</b>: constant used to vary the time between one reading and another.
+*  <b>"_board_"</b>:
 
-*  <b>"login"</b>:    
-    *  <b>"user"</b>: user;
-    *  <b>"password"</b>: password.
+    *  <b>"_board_id_"</b>: the identification name of the card;
+    *  <b>"_type_"</b>: it must remain unchanged;
+    *  <b>"_local_host_name_"</b>: the host name of the card to connect to with your browser;
+    *  <b>"_rateo_"</b>: constant used to vary the time between one reading and another.
+
+*  <b>"_login_"</b>:    
+    *  <b>"_user_"</b>: user;
+    *  <b>"_password_"</b>: password.
     
 
-*  <b>"location"</b>:    
-    *  <b>"city"</b>: the name of the city where the sensor is installed;
-    *  <b>"country"</b>: the name of the country where the sensor is installed.
+*  <b>"_location_"</b>:    
+    *  <b>"_city_"</b>: the name of the city where the sensor is installed;
+    *  <b>"_country_"</b>: the name of the country where the sensor is installed.
     
 
-*  <b>"field_1"</b> & <b>"field_2"</b>:    
-    *  <b>"name"</b>: it must remain unchanged;
-    *  <b>"url"</b>: Thingspeak channel fields URL.
+*  <b>"_field_1_"</b> & <b>"_field_2_"</b>:    
+    *  <b>"_name_"</b>: it must remain unchanged;
+    *  <b>"_url_"</b>: Thingspeak channel fields URL.
 
 The other fields are not currently used.
 
@@ -90,7 +89,7 @@ The other fields are not currently used.
 First of all you need to create a bot on the Telegram with <b>BothFather</b> function. The procedure 
 can be found at this <a href="https://core.telegram.org/bots#6-botfather">link</a>.
 
-Obtained the token of our new bot, it must be inserted in the <b>secret.h</b> file.
+Obtained the token of our new bot, it must be inserted in the <b>_secret.h_</b> file.
 
 Through the bot, you can interrogate the sensor with commands:
 <ul>
