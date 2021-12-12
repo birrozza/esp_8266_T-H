@@ -67,13 +67,11 @@ Obtained the token of our new bot, it must be inserted in the <b>secret.h</b> fi
 
 Through the bot, you can interrogate the sensor with commands:
 <ul>
-    <li><b>read</b>:  returns the latest temperature and humidity reading;</li>
-    <li><b>wifi</b>:  returns the parameters of the wifi connection;</li>
-    <li><b>stato</b>: returns the last status of the data transmission to ThingSpeak.</li>
+    <li><b>"read"</b>:  returns the latest temperature and humidity reading;</li>
+    <li><b>"wifi"</b>:  returns the parameters of the wifi connection;</li>
+    <li><b>"stato"</b>: returns the last status of the data transmission to ThingSpeak.</li>
 </ul> 
-[link](https://core.telegram.org/bots#6-botfather).
-Obtained the token of our new bot, it must be inserted in the <b>secret.h</b> file
-
+<br>
 <strong>Stay tuned!!! (last update december 2021)</strong>
 
 If you want to support me, you can always donate to my paypal account https://www.paypal.me/birrozza  or tiping me. Thanks
