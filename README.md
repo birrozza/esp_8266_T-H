@@ -83,6 +83,7 @@ In fact, in the file we find the following fields and modifiable sub fields:
 
 The other fields are not currently used.
 
+After modifying the file, you can upload it using the "upload file" function on the setting page. The changes will take effect immediately.
 
 
 <h2><strong>+ NEWS +  Enabled a Telegram bot to be able to interrogate the sensor </strong></h2>
@@ -100,4 +101,6 @@ Through the bot, you can interrogate the sensor with commands:
 <br>
 <strong>Stay tuned!!! (last update december 2021)</strong>
 
-If you want to support me, you can always donate to my paypal account https://www.paypal.me/birrozza  or tiping me. Thanks
+If you want to support me, you can always donate to my paypal account https://www.paypal.me/birrozza. 
+
+**Thanks**
