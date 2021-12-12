@@ -58,7 +58,11 @@ Below, in the <strong>File Manager</strong> section, you have the image of the <
 <h3><strong>+++ NEWS +++</strong></h3>
 
 <h2><strong>Enabled a Telegram bot to be able to interrogate the sensor. </strong></h2>
-[Here](https://core.telegram.org/bots#6-botfather) 
+First of all you need to create a bot on the Telegram. The procedure can be found at this 
+ 
+[link](https://core.telegram.org/bots#6-botfather) 
+
+
 
 <strong>Stay tuned!!! (last update december 2021)</strong>
 
