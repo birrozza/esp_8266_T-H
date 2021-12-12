@@ -37,8 +37,10 @@ In this case, thanks to code inside (sketch), the data is sent to a web platform
 <h3>Software istruction</h3>
 
 <p>First you need to register the service (free but with some limitations) here:  <a href="https://thingspeak.com">www.thingspeak.com</a>
+The <b>channel ID</b> parameter and <b>API token</b> parameter must both be entered in <b>secret.h</b> file.
 <br> 
- So,  downloading the code for Arduino here: <a href="https://mega.nz/folder/5xNTyIzC#M9TTcUxb8Wu45iBey7yj3w"> sketch folder</a> 
+
+ So,  download the code for Arduino from the <a href="https://github.com/birrozza/esp_8266_T-H">link</a> above.
 <br>
 With the Arduino IDE, you must enter in the <strong>secret.h</strong> file and update the <em><strong>Channel ID</em></strong> and the <em><strong>Channel Write Key</strong></em> values whith obtained when the service was activated on Thingspeak.</p>
 
@@ -60,10 +62,8 @@ Below, in the <strong>File Manager</strong> section, you have the image of the <
 <h2><strong>Enabled a Telegram bot to be able to interrogate the sensor. </strong></h2>
 First of all you need to create a bot on the Telegram with <b>BothFather</b> function. The procedure can be found at this 
  
-[link](https://core.telegram.org/bots#6-botfather) 
-
-
-
+[link](https://core.telegram.org/bots#6-botfather).
+Obtained the token of our new bot, it must be inserted in the <b>secret.h</b> file
 
 <strong>Stay tuned!!! (last update december 2021)</strong>
 
