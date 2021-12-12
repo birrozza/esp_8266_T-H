@@ -15,7 +15,7 @@
     },
     "thinkspeak": {
         "secret_key": {
-            "id": 000000,
+            "id": 0,
             "api_key": "non_usato"
         },
         "field_1": {
