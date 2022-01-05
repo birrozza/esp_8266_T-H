@@ -11,7 +11,7 @@ My wireless temperature and humidity sensor needed a case to protect it from the
 In this case, thanks to code inside (sketch), the data is sent to a web platform (www.thingspeak.com) and displayed through graphics. Moreover, these and other data can be viewed on all network devices because the wemos card works as a <strong>web-server </strong>(see below)
 
 
-[This is my chanel were data are sent ](https://thingspeak.com/channels/867219)  The data are in real-time
+[This is my chanel were data are sent ](https://thingspeak.com/channels/867219).  The data are in real-time
 
 <h3>Necessary material:</h3>
 
@@ -58,7 +58,7 @@ Below, in the <strong>File Manager</strong> section, you have the image of the <
 <h3>Configuration</h3>
 
 Through the <b>_config.json_</b> file it is possible to configure the program.
-In fact, in the file we find the following fields and modifiable sub fields:
+In fact, in the file you find the following fields and modifiable sub fields:
 
 *  <b>"_board_"</b>:
 
@@ -84,6 +84,8 @@ In fact, in the file we find the following fields and modifiable sub fields:
 The other fields are not currently used.
 
 After modifying the file, you can upload it using the "upload file" function on the setting page. The changes will take effect immediately.
+
+
 
 
 <h2><strong>+ NEWS +  Enabled a Telegram bot to be able to interrogate the sensor </strong></h2>
