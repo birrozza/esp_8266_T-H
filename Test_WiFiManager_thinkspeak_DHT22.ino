@@ -10,22 +10,26 @@
 #include "ESPAsyncTCP.h"        // https://github.com/me-no-dev/ESPAsyncTCP
 #include "ESPAsyncWebServer.h"  // https://github.com/me-no-dev/ESPAsyncWebServer
 #include "ESPAsyncWiFiManager.h"// WifiManager 2.0.3 alpha
-#include "AsyncTelegram.h";     // ver 1.1.3
+#include "AsyncTelegram.h"      // ver 1.1.3
 #include <ArduinoJson.h>        // ver 6.15.1
 #include "ThingSpeak.h"         // ver 1.5.0
+#include <TimeLib.h>            // ver 1.6.1   
 #include <math.h>
-
+       
 #include "utility.h"
 #include "C:\Users\computer\Desktop\esp8266 sketch\secret.h"   // always comment on this line (for development only) 
 //#include "secret.h" // uncomment if it's commented out
 #include "sensore_DHT_22.h"     //  
 #include "testiHTML.h" // la sintassi HTML con indentazione leggibile
-#include "letturaSPIFFS.h"
+//#include "letturaSPIFFS.h"
 
-//// variabili
-unsigned long  myChannelNumber = SECRET_CH_ID;
-const char     * myWriteAPIKey = SECRET_WRITE_APIKEY;
-const char* token = SECRET_TELEGRAM_BOT_TOKEN;
+#define GOOGLE_SHEET_ENABLED //video 529
+#define TELEGRAM_BOT_ENABLED
+
+//// variable
+unsigned long  myChannelNumber = SECRET_CH_ID;        // ┌───────────┐
+const char     * myWriteAPIKey = SECRET_WRITE_APIKEY; // │from secret.h file│
+const char* token = SECRET_TELEGRAM_BOT_TOKEN;        // └───────────┘
 WiFiClient     client;
 String         boardName;
 String         password;
@@ -39,12 +43,13 @@ float lastHumidityRead = 0.0;
 AsyncTelegram myBot;
 TBMessage msg;
 String stato=" ESP start";
-String statoIp=stato; 
-float rateo = 1.57; // costante per regolare l'intervallo delle letture
+String statoIp=stato;
+int count=0;//14800000 * rateo;  
+//float rateo = 1.57; // costante per regolare l'intervallo delle letture
 
 //for LED status
 Ticker ticker;
-int count=14800000 * rateo; 
+
 
   // function prototypes for HTTP handlers
 void dirRequest (AsyncWebServerRequest *request);
@@ -70,11 +75,11 @@ void configModeCallback (AsyncWiFiManager  *myWiFiManager) {
 }
  
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
-
-  SPIFFS.begin();                           // Start the SPI Flash Files System
-  String a=letturaSPIFFS();   /// variabile inutilizzata
+  setTime(05,55,00,9,1,2022); // inserisco una data fittizia dal quale calcolare i timer, 5 min prima dalla prima lettura
+  count = minute(); // setto al minuto del tempo impostato
+  Serial.begin(57600);
+  SPIFFS.begin();   // Start the SPI Flash Files System
+  
   File txtFile = SPIFFS.open(F("/config.json"),"r"); // apri il file di configurazione
   String configuration = txtFile.readString();
   txtFile.close(); // chiudi il file
@@ -87,7 +92,7 @@ void setup() {
   hostName = String(doc["board"]["local_host_name"]);
   user = String(doc["login"]["user"]);
   password = String(doc["login"]["password"]);
-  rateo = float(doc["board"]["rateo"]);
+  //rateo = float(doc["board"]["rateo"]);
   
   //myChannelNumber = (doc["thinkspeak"]["id"]);
   //myWriteAPIKey = (doc["thinkspeak"]["api_key"]);
@@ -120,20 +125,19 @@ void setup() {
     ESP.reset();
     delay(1000);
   }
- 
   //if you get here you have connected to the WiFi
   Serial.println("connected...yeey :)");
   
   ticker.detach();
   //keep LED on
   digitalWrite(BUILTIN_LED, LOW);
-
   Serial.println('\n');
   Serial.print("Connected to ");
   Serial.println(WiFi.SSID());              // Tell us what network we're connected to
   Serial.print("IP address:\t");
   Serial.println(WiFi.localIP());           // Send the IP address of the ESP8266 to the computer
 
+  // setup server services
   server.on("/", HTTP_GET,  [](AsyncWebServerRequest *request) {
     request->send(SPIFFS, "/index.html", "text/html");
   });
@@ -184,40 +188,18 @@ void setup() {
     Serial.println("dnsserver partito");
 */  
 
-   if (!MDNS.begin(hostName, WiFi.localIP(),3600)) {             // Start the mDNS responder for myesp.local
+  if (!MDNS.begin(hostName, WiFi.localIP(),3600)) {             // Start the mDNS responder for myesp.local
         Serial.println("Error setting up MDNS responder!");
   }
   Serial.println("mDNS responder started");
-   // Add service to MDNS-SD
+  // Add service to MDNS-SD
   MDNS.addService("http", "tcp", 80);
   WiFi.mode(WIFI_STA);
 
   ThingSpeak.begin(client);
-  //SPIFFS.begin();                           // Start the SPI Flash Files System
-  //String a=letturaSPIFFS();   /// variabile inutilizzata
-
-  /*   
-  File txtFile = SPIFFS.open(F("/board.txt"),"r"); // apri il file board.txt dove c'è il nome della board
-  boardName = txtFile.readString();
-  Serial.println(boardName); // stampala sulla console
-  txtFile.close(); // chiudi il file
-  */
   
   sensore_DHT_22(); //setup del sensore
 
-  /*
-  File txtFile = SPIFFS.open(F("/config.json"),"r"); // apri il file board.txt dove c'è il nome della board
-  String configuration = txtFile.readString();
-  //Serial.println(configuration); // stampala sulla console
-  txtFile.close(); // chiudi il file
-
-  DynamicJsonDocument doc(1024);
-  deserializeJson(doc, configuration);
-
-  boardName = String(doc["board"]["board_id"]);
-  //const char* token = doc["telegram_bot"]["token"];
-  */
-  
   // Set the Telegram bot properies
   myBot.setClock("CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00");  //CET-1CEST,M3.5.0,M10.5.0/3
   myBot.setUpdateTime(2000);
@@ -238,7 +220,6 @@ void setup() {
 } // end setup
 
 void loop() {
-  
   MDNS.update();
   //sensors_event_t event;
 
@@ -247,14 +228,15 @@ void loop() {
   if (stato!="---") statoIp=stato; // conserva l'ultimo stato utile da riportare sul web
     else statoIp="All ok";
   
-  if (count==(15000000 * rateo)){  // 5 milioni sono circa 1 minuto (150.000.000
-                        //50 milioni sono circa 10 minuti   
-    
+  //if (count==(15000000 * rateo)){  // 5 milioni sono circa 1 minuto (150.000.000
+  //                      //50 milioni sono circa 10 minuti   
+  if((minute()==0 || minute()== 30) && (second()==0)){ //alla mezz'ora e al cambio ora leggo temperatura
     dht.temperature().getEvent(&event);
     if (isnan(event.temperature)) {
       Serial.println(F("Error reading temperature!"));
       stato=stato+" Error reading temperature";
-      count-=2000 * rateo;
+      setTime(now()-60);// porto indietro di 1 min l'orologio se ci sono problemi nella lettuta
+      //count-=2000 * rateo;
     } else {
       Serial.print(F("Temperatura: "));
       Serial.print(event.temperature);
@@ -264,12 +246,14 @@ void loop() {
       lastTemperatureRead = event.temperature;
     }
   }    
-  if (count==(15050000 * rateo)) {  
+  //if (count==(15050000 * rateo)) {  
+  if((minute()==2 || minute()== 32) && (second()==0)){ // dopo due minuti leggo umidità
     dht.humidity().getEvent(&event);
     if (isnan(event.relative_humidity)) {
       Serial.println(F("Error reading humidity!"));
-      count-=2000 * rateo;
+      //count-=2000 * rateo;
       stato=stato+" Error reading humidity";
+      setTime(now()-60);// porto indietro di 1 min l'orologio se ci sono problemi nella lettuta
     } else {
       float hum=event.relative_humidity;//0.9-34.6; // per calibrare il valore dell'umidità
       Serial.print(F("Umidità: "));
@@ -283,22 +267,23 @@ void loop() {
       lastHumidityRead = hum;
     } 
   }
-  if (count>=(15950000 * rateo)) {  // garantisce una lettura quasi ogni 30 minuti
+  //if (count>=(15950000 * rateo)) {  // garantisce una lettura quasi ogni 30 minuti
+  if((minute()==4 || minute()== 34) && (second()==0)){ // dopo altri due minuti invia la lettura
     int x = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
     if(x == 200){
       Serial.println("Channel update successful.");
       //statoIP+=" ch update ok";
-      count=0;
+      //count=0;
     } else {
       Serial.println("Problem updating channel. HTTP error  " + msgFeedBack(x)); 
       stato=stato+"*** Problem updating channel last time. HTTP error " + msgFeedBack(x)+" --- "; 
-      count=14000000 * rateo; // se ci sono problemi nell'aggiornamento dei dati, fa tutto nuovamente
+      //count=14000000 * rateo; // se ci sono problemi nell'aggiornamento dei dati, fa tutto nuovamente
+      setTime(now()-300); // se ci sono problemi riporta indietro il tempo di 5 min e ricomincia daccapo
     }
   }
-  count++;
+  count=minute()>=30? 60-minute():30-minute(); // countdown in base al minuto
   
   //telegram step
-  
   if (myBot.getNewMessage(msg)) { //se è presente un messaggio
     if (msg.text.equalsIgnoreCase("read")) {
       String replay = "Ciao " + String(msg.sender.firstName) + "!!!\nGli ultimi dati letti:";
@@ -314,6 +299,7 @@ void loop() {
     } // wifi
     else if (msg.text.equalsIgnoreCase("stato")){
       String replay = "Stato: " + stato;
+      replay += "\nCount: -"+String(count)+" min";
       myBot.sendMessage(msg, replay);
     } // stato
     else {
@@ -346,7 +332,6 @@ void handleIpRequest(AsyncWebServerRequest *request){ // invia json con ip, city
   serializeJson(rispostaJson, json); // da json a stringa per l'invio
   //Serial.print('json: ' + json);
   request->send(200, "text/json", json); //invia json
-
 }
 
 void handleLogin(AsyncWebServerRequest *request) {                         // If a POST request is made to URI /login
@@ -357,9 +342,8 @@ void handleLogin(AsyncWebServerRequest *request) {                         // If
     return;
   }
   if(request->arg("username") == user && request->arg("password") == password) { // If both the username and the password are correct
-    
-    request->send(SPIFFS, "/login.html");
-    } else {                                                                              // Username and password don't match
+      request->send(SPIFFS, "/login.html");
+  } else {                                                                              // Username and password don't match
       request->send(401, "text/html", unauthorized);// unauthorized = stringa in formato HTML (vedi testiHTML.h)
   }
 }
@@ -392,7 +376,7 @@ void handleFileUpload(AsyncWebServerRequest *request, String filename, size_t in
         //aggiorno i parametri sensibili
         boardName = String(fileConfig["board"]["board_id"]);
         String newHostName = String(fileConfig["board"]["local_host_name"]);
-        rateo = float(fileConfig["board"]["rateo"]);
+        //rateo = float(fileConfig["board"]["rateo"]);
         user = String(fileConfig["login"]["user"]);
         password = String(fileConfig["login"]["password"]);
         if (newHostName!=hostName){
@@ -402,7 +386,7 @@ void handleFileUpload(AsyncWebServerRequest *request, String filename, size_t in
             Serial.println("Error setting up MDNS responder!");
           }  
         }  
-      }    
+    }    
     request->redirect("/setpage");
   } 
 }
@@ -422,16 +406,13 @@ void dirRequest (AsyncWebServerRequest *request){
         // get filename
         JsonArray dir_file = dir_json[x++].createNestedArray("file");
         dir_file.add(String(dir.fileName()));
-        
         // If element have a size display It else write 0
         if(dir.fileSize()) {
             File f = dir.openFile("r");
             dir_file.add(String(f.size()));
-            //json+="\""+ String(f.size())+"\"]},";
             f.close();
         }else{
-            dir_file.add("0");
-            //json+="\"0\"]},";
+            dir_file.add("0");            
         }
     }
     doc["ip"] = WiFi.localIP().toString();
@@ -445,15 +426,19 @@ void dirRequest (AsyncWebServerRequest *request){
     infosys.add(String("Page Size:       " + String(fs_info.totalBytes)    + " byte"));
     infosys.add(String("Max open files:  " + String(fs_info.maxOpenFiles)  + " files"));
     infosys.add(String("Max path lenght: " + String(fs_info.maxPathLength)));
-    infosys.add(String("Count:           " + String(count)));
-    infosys.add(String("Rateo:           " + String(rateo)));
+    if (count!=1){  //se non è all'ultimo minuto conta i minuti
+      infosys.add(String("Count down:      -" + String(count) + " min"));
+    } else{ // se è all'ultimo minuto conta i secondi 
+      infosys.add(String("Count down:     -" + String(60-second()) + " sec"));
+    }
+    //infosys.add(String("Rateo:           " + String(rateo)));
     infosys.add(String("Status:          " + statoIp + ""));
     doc["RSSI"] = String(WiFi.RSSI());
     doc["SSID"] = String(WiFi.SSID());
     doc["Board_Name"] = boardName;
     doc["Temperature"] = String(lastTemperatureRead);
     doc["Humidity"] = String(lastHumidityRead);
-    doc["Rateo"] = rateo;
+    //doc["Rateo"] = rateo;
     doc["Host_name"] = hostName;
     doc["Count"]= count;
     //doc["bot"] = myBot.begin(); //inchioda la scheda

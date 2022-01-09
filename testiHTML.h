@@ -31,7 +31,7 @@ String unauthorized   =  // 401 non autorizzato
                                   "<span style=\"color: #ff0000;\">Unauthorized !!!</span>" +
                             "</strong>" + 
                         "</h1>" + poweredBy  /*+ "</body></html>"*/ ;
-                        
+                       
 String invalidRequest = // 400 invalid request
                 String (/*<html><body>*/"<h1 style=\"text-align: center; background-color: #C0BEA8;\">") + 
                             "<strong>" +
@@ -43,9 +43,10 @@ String invalidRequest = // 400 invalid request
                                   "<span style=\"color: #ff0000;\">Invalid request !!!</span>" +
                             "</strong>" + 
                         "</h1>" + poweredBy /*+ "</body></html>"*/ ;
-
+/*
 String WebPageInit = String ("");
 
 String WebPageClose = "";
 
 String wifichart=String("");
+*/

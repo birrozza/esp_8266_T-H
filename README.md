@@ -57,7 +57,7 @@ Below, in the <strong>File Manager</strong> section, you have the image of the <
 
 <h3>Configuration</h3>
 
-Through the <b>_config.json_</b> file it is possible to configure the program.
+Through the <b>_config.json_</b> file it is possible to configure the program at run-time.
 In fact, in the file you find the following fields and modifiable sub fields:
 
 *  <b>"_board_"</b>:
@@ -101,7 +101,7 @@ Through the bot, you can interrogate the sensor with commands:
     <li><b>"<em>stato</em>"</b>: returns the last status of the data transmission to ThingSpeak.</li>
 </ul> 
 <br>
-<strong>Stay tuned!!! (last update december 2021)</strong>
+<strong>Stay tuned!!! (last update January 2022)</strong>
 
 If you want to support me, you can always donate to my paypal account https://www.paypal.me/birrozza. 
 

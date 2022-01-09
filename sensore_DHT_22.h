@@ -5,6 +5,19 @@
 #define DHTPIN 4     // Digital pin connected to the DHT sensor 
 // Feather HUZZAH ESP8266 note: use pins 3, 4, 5, 12, 13 or 14 --
 // Pin 15 can work but DHT must be disconnected during program upload.
+// Wemos D1 mini pinout vs arduino pin map
+//
+//     TX  -----> GPIO1
+//     RX  -----> GPIO3
+//     D0  -----> GPIO16
+//     D1  -----> GPIO5
+//     D2  -----> GPIO4
+//     D3  -----> GPIO0
+//     D4  -----> GPIO2
+//     D5  -----> GPIO14
+//     D6  -----> GPIO12
+//     D7  -----> GPIO13
+//     D8  -----> GPIO15
 
 // Uncomment the type of sensor in use:
 //#define DHTTYPE    DHT11     // DHT 11
@@ -19,7 +32,6 @@ DHT_Unified dht(DHTPIN, DHTTYPE);
 uint32_t delayMS;
 
 void sensore_DHT_22() {
-  //Serial.begin(9600);
   // Initialize device.
   dht.begin();
   Serial.println(F("DHTxx Unified Sensor Example"));
@@ -48,50 +60,3 @@ void sensore_DHT_22() {
   // Set delay between sensor readings based on sensor details.
   delayMS = sensor.min_delay / 1000;
 }
-
-String temperatureRead (sensors_event_t event) {
-    dht.temperature().getEvent(&event);
-    if (isnan(event.temperature)) {
-      return (F("Err read temp"));
-    } else {
-      return String(event.temperature);
-    }
-}
-
-String humidityRead (sensors_event_t event) {
-    dht.humidity().getEvent(&event);
-    if (isnan(event.relative_humidity)) {
-      return (F("Err read hum"));
-    } else {
-      float hum=event.relative_humidity;
-      return String(hum);
-    }
-}
-
-/*
-void loop() {
-  // Delay between measurements.
-  delay(delayMS);
-  // Get temperature event and print its value.
-  sensors_event_t event;
-  dht.temperature().getEvent(&event);
-  if (isnan(event.temperature)) {
-    Serial.println(F("Error reading temperature!"));
-  }
-  else {
-    Serial.print(F("Temperature: "));
-    Serial.print(event.temperature);
-    Serial.println(F("°C"));
-  }
-  // Get humidity event and print its value.
-  dht.humidity().getEvent(&event);
-  if (isnan(event.relative_humidity)) {
-    Serial.println(F("Error reading humidity!"));
-  }
-  else {
-    Serial.print(F("Humidity: "));
-    Serial.print(event.relative_humidity);
-    Serial.println(F("%"));
-  }
-
-}*/

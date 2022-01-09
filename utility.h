@@ -1,4 +1,4 @@
-String msgFeedBack(int httpCode) { /// diagnostica: codici d'errore ThinkSpeak
+String msgFeedBack(int httpCode) { /// diagnostica: codici d'errore ThingSpeak
 
   switch (httpCode) {
     case  200: return String("Code (200) OK / Success");

@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="IE=edge" >
-    <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+    <meta name="author" content="Angelo MIRABELLI">
     <title>Esp 8266 Setting</title>    
     <style>
           body {
@@ -77,7 +78,8 @@
           color: green;
         }  
         p.rssi{
-          color: red;
+          color: yellow;
+          border-color: yellow;
         }
         h1.intestazione{
             
@@ -255,25 +257,31 @@
                     boardName.textContent= "Board: " + json['Board_Name']; 
                     temp.textContent     = "Temp.: " + json['Temperature'] + '°C';
                     humid.textContent    = "Humid.: " + json['Humidity'] + "%"; 
-                    rateo = json["Rateo"];
+                    //rateo = json["Rateo"];
                     textArea ="Info system: \n";
                     const sysinfo = json['infosys'];  // indico 
                     for (let i = 0; i<sysinfo.length; i++) {
                         let br="\n";
-                        let strForCount = '';
-                        // trova la parola Count 
+                        let strForCount = ''; // usata
+                        // trova la parola Count
+                        /* 
                         if (sysinfo[i].indexOf('Count')!== -1) { //se il campo è quello giusto (non è diversa) 
                             let stringa= sysinfo[i].slice(7); // metti nella variabile stringa l'ultima parte  
                             //console.log(String(parseInt(stringa)/(15950000*rateo)*100).slice(0,4));
                             //quindi converti in int, fai i calcoli e metti tutto in strForCount
                             strForCount = ' (' + String(parseInt(stringa)/(15950000*rateo)*100).slice(0,4)+'%)';
                         }
+                        */
                         if (i===(sysinfo.length-1)) br=""; // se è ultimo elemento non metti il capo linea (-1 perchè parte da 0 l'indice)
                         textArea += sysinfo[i]+strForCount+br;    
                     }
                     infTextArea.value = textArea;
                     console.log("ok");
+                    rssi.setAttribute("style","color: green; border-color: green;");
+                    
                 }).catch (function (err) {
+                    rssi.setAttribute("style","border-color: red; color: red;");
+                    
                     console.log('Fetch problem: ' + err.message);
             });
         }
