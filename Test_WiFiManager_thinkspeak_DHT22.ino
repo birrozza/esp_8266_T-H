@@ -12,7 +12,7 @@
 #include "ESPAsyncWiFiManager.h"// WifiManager 2.0.3 alpha
 #include "AsyncTelegram.h"      // ver 1.1.3
 #include <ArduinoJson.h>        // ver 6.15.1
-#include "ThingSpeak.h"         // ver 1.5.0
+#include "ThingSpeak.h"         // ver 1.5.0 -> 2.0.1
 #include <TimeLib.h>            // ver 1.6.1   
 #include <math.h>
        
@@ -42,7 +42,7 @@ float lastTemperatureRead = 0.0;
 float lastHumidityRead = 0.0;
 AsyncTelegram myBot;
 TBMessage msg;
-String stato=" ESP start";
+String stato=" ESP start"; // stato corrente del sistema
 String statoIp=stato;
 int count=0;//14800000 * rateo;  
 //float rateo = 1.57; // costante per regolare l'intervallo delle letture
@@ -75,7 +75,7 @@ void configModeCallback (AsyncWiFiManager  *myWiFiManager) {
 }
  
 void setup() {
-  setTime(05,55,00,9,1,2022); // inserisco una data fittizia dal quale calcolare i timer, 5 min prima dalla prima lettura
+  setTime(05,58,00,9,1,2022); // inserisco una data fittizia dal quale calcolare i timer, 5 min prima dalla prima lettura
   count = minute(); // setto al minuto del tempo impostato
   Serial.begin(57600);
   SPIFFS.begin();   // Start the SPI Flash Files System
@@ -158,7 +158,7 @@ void setup() {
   });
   server.on("/reset", HTTP_GET, [](AsyncWebServerRequest *request) { // chiedi il reset
     request->send(SPIFFS, "/index.html", "text/html");  
-    ESP.restart();
+    ESP.restart(); // avvio completo della scheda
   });
   server.on("/directory", HTTP_GET,  dirRequest);
   server.on("/upload", HTTP_POST, [](AsyncWebServerRequest *request){
@@ -229,23 +229,38 @@ void loop() {
     else statoIp="All ok";
   
   //if (count==(15000000 * rateo)){  // 5 milioni sono circa 1 minuto (150.000.000
-  //                      //50 milioni sono circa 10 minuti   
-  if((minute()==0 || minute()== 30) && (second()==0)){ //alla mezz'ora e al cambio ora leggo temperatura
+  if((minute()==59 || minute()== 29) && (second()==0)){ //alla mezz'ora e al cambio ora leggo temperatura e umidità
     dht.temperature().getEvent(&event);
-    if (isnan(event.temperature)) {
+    float temp = event.temperature;
+    if (isnan(event.temperature)) { // se errore lettura temperatura
       Serial.println(F("Error reading temperature!"));
       stato=stato+" Error reading temperature";
-      setTime(now()-60);// porto indietro di 1 min l'orologio se ci sono problemi nella lettuta
-      //count-=2000 * rateo;
+      setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettuta      
     } else {
       Serial.print(F("Temperatura: "));
-      Serial.print(event.temperature);
+      Serial.print(temp);
       Serial.println(F("°C"));
-      // Write value to Field 1 of a ThingSpeak Channel
-      ThingSpeak.setField(1, event.temperature);
-      lastTemperatureRead = event.temperature;
+      lastTemperatureRead = temp;
+    }
+    delay(1000);    
+    dht.humidity().getEvent(&event);
+    float hum=event.relative_humidity;
+    if (isnan(event.relative_humidity)) { // se errore lettura umidità
+      Serial.println(F("Error reading humidity!"));
+      stato=stato+" Error reading humidity";
+      setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettuta    
+    } else {
+      Serial.print(F("Umidità: "));
+      Serial.print(hum);
+      Serial.println(F("%"));
+      Serial.println("lettura dati ok!!!");
+      stato=stato+"Read data ok";
+      ThingSpeak.setStatus(stato);
+      //stato="---"; // azzera lo stato
+      lastHumidityRead = hum;
     }
   }    
+  /*
   //if (count==(15050000 * rateo)) {  
   if((minute()==2 || minute()== 32) && (second()==0)){ // dopo due minuti leggo umidità
     dht.humidity().getEvent(&event);
@@ -260,25 +275,30 @@ void loop() {
       Serial.print(hum);
       Serial.println(F("%"));
       // Write value to Field 1 of a ThingSpeak Channel
-      ThingSpeak.setField(2, hum);
-      stato=stato+" Read ok";
+      //ThingSpeak.setField(2, hum);
+      stato=stato+" Read Hum ok";
       ThingSpeak.setStatus(stato);
       stato="---"; // azzera lo stato
       lastHumidityRead = hum;
     } 
   }
+  */
   //if (count>=(15950000 * rateo)) {  // garantisce una lettura quasi ogni 30 minuti
-  if((minute()==4 || minute()== 34) && (second()==0)){ // dopo altri due minuti invia la lettura
+  if((minute()==0 || minute()== 30) && (second()==0)){ // dopo altri due minuti invia la lettura
+    ThingSpeak.setField(1, lastTemperatureRead);
+    ThingSpeak.setField(2, lastHumidityRead);
     int x = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
     if(x == 200){
       Serial.println("Channel update successful.");
+      stato="-"+String(x)+"-"; // azzera lo stato
       //statoIP+=" ch update ok";
       //count=0;
+      delay(1000);
     } else {
       Serial.println("Problem updating channel. HTTP error  " + msgFeedBack(x)); 
-      stato=stato+"*** Problem updating channel last time. HTTP error " + msgFeedBack(x)+" --- "; 
+      stato=stato+"* Problem updating channel. HTTP error " + msgFeedBack(x)+" --- "; 
       //count=14000000 * rateo; // se ci sono problemi nell'aggiornamento dei dati, fa tutto nuovamente
-      setTime(now()-300); // se ci sono problemi riporta indietro il tempo di 5 min e ricomincia daccapo
+      setTime(now()-120); // se ci sono problemi riporta indietro il tempo di 2 min e ricomincia daccapo
     }
   }
   count=minute()>=30? 60-minute():30-minute(); // countdown in base al minuto
@@ -302,6 +322,12 @@ void loop() {
       replay += "\nCount: -"+String(count)+" min";
       myBot.sendMessage(msg, replay);
     } // stato
+    else if (msg.text.equalsIgnoreCase("reset")){
+      String replay = "Tra 5 secondi la scheda si riavvia" ;
+      myBot.sendMessage(msg, replay);
+      delay(5000);
+      ESP.reset();
+    } // reset
     else {
       String replay = "Ciao!!! \nScelte disponibili:\n- read -> temp & Humidity;\n- wifi -> wifi status;\n- stato -> stato.";
       myBot.sendMessage(msg, replay);
@@ -429,7 +455,7 @@ void dirRequest (AsyncWebServerRequest *request){
     if (count!=1){  //se non è all'ultimo minuto conta i minuti
       infosys.add(String("Count down:      -" + String(count) + " min"));
     } else{ // se è all'ultimo minuto conta i secondi 
-      infosys.add(String("Count down:     -" + String(60-second()) + " sec"));
+      infosys.add(String("Count down:      -" + String(60-second()) + " sec"));
     }
     //infosys.add(String("Rateo:           " + String(rateo)));
     infosys.add(String("Status:          " + statoIp + ""));
