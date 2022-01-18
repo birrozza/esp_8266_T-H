@@ -21,7 +21,7 @@ In this case, thanks to code inside (sketch), the data is sent to a web platform
 </ul>
 </blockquote>
 
-<h3>Arduino Libraries:</h3>
+### Arduino Libraries:
 | Library | Source |
 | ------ | ------ |
 | ESP8266WiFi.h | ESP8266 Arduino Core (ver 3.0.2) |
@@ -89,7 +89,7 @@ The other fields are not currently used.
 After modifying the file, you can upload it using the "upload file" function on the setting page. The changes will take effect immediately.
 
 
-<h3>Firmware OTA update (Over The Air)</h3>
+### Firmware OTA update (Over The Air)
 You can now also update the firmware in the card via the **OTA (Over The Air)** feature. In fact, it is no longer necessary to connect it to the PC but through the Arduino IDE it can be updated remotely. Just select the network port in the menu: *tools -> port -> Network Ports*.
 
 <h2><strong>+ NEWS +  Enabled a Telegram bot to be able to interrogate the sensor </strong></h2>
