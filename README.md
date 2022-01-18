@@ -11,17 +11,7 @@ In this case, thanks to code inside (sketch), the data is sent to a web platform
 
 [This is my chanel were data are sent ](https://thingspeak.com/channels/867219).  The data are in real-time
 
-<h3>Necessary material:</h3>
-
-<blockquote>
-<ul>
-<li><p> <a href="https://www.banggood.com/Geekcreit-D1-mini-V2_2_0-WIFI-Internet-Development-Board-Based-ESP8266-4MB-FLASH-ESP-12S-Chip-p-1143874.html?p=MX1504307245201310VT&custlinkid=673886">Wemos D1 mini clone based on ESP8266 chip </a></p></li>
-<li><p> <a href="https://www.banggood.com/AM2302-DHT22-Temperature-And-Humidity-Sensor-Module-For-Arduino-SCM-p-937403.html?rmmds=search&cur_warehouse=CN">DHT 22 sensor (temeperature & Humidity)</a></p></li>
-<li><p> <a href="https://www.thingiverse.com/thing:3965015">My printable case project on Thingiverse.com</a></p></li>
-</ul>
-</blockquote>
-
-### Arduino Libraries:
+### Dependency:
 | Library | Source |
 | ------ | ------ |
 | ESP8266WiFi.h | ESP8266 Arduino Core (ver 3.0.2) |
@@ -36,6 +26,16 @@ In this case, thanks to code inside (sketch), the data is sent to a web platform
 | ThingSpeak.h | Ver 2.0.1 |
 | TimeLib.h | Ver 1.6.1 |
 | ArduinoOTA.h | ....... |
+
+<h3>Necessary material:</h3>
+
+<blockquote>
+<ul>
+<li><p> <a href="https://www.banggood.com/Geekcreit-D1-mini-V2_2_0-WIFI-Internet-Development-Board-Based-ESP8266-4MB-FLASH-ESP-12S-Chip-p-1143874.html?p=MX1504307245201310VT&custlinkid=673886">Wemos D1 mini clone based on ESP8266 chip </a></p></li>
+<li><p> <a href="https://www.banggood.com/AM2302-DHT22-Temperature-And-Humidity-Sensor-Module-For-Arduino-SCM-p-937403.html?rmmds=search&cur_warehouse=CN">DHT 22 sensor (temeperature & Humidity)</a></p></li>
+<li><p> <a href="https://www.thingiverse.com/thing:3965015">My printable case project on Thingiverse.com</a></p></li>
+</ul>
+</blockquote>
 
 <h3>Software istruction</h3>
 
@@ -68,7 +68,7 @@ In fact, in the file you find the following fields and modifiable sub fields:
     *  <b>"_board_id_"</b>: the identification name of the card;
     *  <b>"_type_"</b>: it must remain unchanged;
     *  <b>"_local_host_name_"</b>: the host name of the card to connect to with your browser;
-    *  <b>"_rateo_"</b>: constant used to vary the time between one reading and another.
+    *  <b>"_rateo_"</b>: no longer in use.
 
 *  <b>"_login_"</b>:    
     *  <b>"_user_"</b>: user;
@@ -86,7 +86,7 @@ In fact, in the file you find the following fields and modifiable sub fields:
 
 The other fields are not currently used.
 
-After modifying the file, you can upload it using the "upload file" function on the setting page. The changes will take effect immediately.
+After modifying the file, you can upload it using the "_upload file_" function on the setting page. The changes will take effect immediately.
 
 
 ### Firmware OTA update (Over The Air)
