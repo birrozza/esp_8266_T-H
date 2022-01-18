@@ -4,8 +4,6 @@
 <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/birrozza/esp_8266_T-H/total">
 
 </p>
-My wireless temperature and humidity sensor needed a case to protect it from the weather. I designed and printed this my idea of  case for this sensor consisting of a Wemos D1 mini card (a clone of it is fine too) and a DHT22 module.
-
 <p>The DHT22 module, thanks to its sensors, can detect the temperature and humidity of the surrounding environment, and send this data to the Wemos board which, thanks to its wifi module, can transmit them to a PC or smartphone.</p>
 
 In this case, thanks to code inside (sketch), the data is sent to a web platform (www.thingspeak.com) and displayed through graphics. Moreover, these and other data can be viewed on all network devices because the wemos card works as a <strong>web-server </strong>(see below)
@@ -23,17 +21,22 @@ In this case, thanks to code inside (sketch), the data is sent to a web platform
 </ul>
 </blockquote>
 
-<h3>Arduino code and library:</h3>
-<blockquote> 
-<ul>
-<li>
-<p> <a href="https://github.com/birrozza/esp_8266_T-H">Here you can download the arduino sketch (Git-Hub repository)</a></p>
-</li>
-<li>
-<p> <a href="https://github.com/alanswx/ESPAsyncWiFiManager">ESPAsyncWiFiManager library</a></p>
-</li>
-</ul>
-</blockquote>
+###Arduino Libraries:
+| Library | Source |
+| ------ | ------ |
+| ESP8266WiFi.h | ESP8266 Arduino Core (ver 3.0.2) |
+| Ticker.h | ESP8266 Arduino Core (ver 3.0.2) |
+| ESP8266mDNS.h | ESP8266 Arduino Core (ver 3.0.2) |
+| FS.h| ESP8266 Arduino Core (ver 3.0.2) |
+| ESPAsyncTCP.h | https://github.com/me-no-dev/ESPAsyncTCP |
+| ESPAsyncWebServer.h | https://github.com/me-no-dev/ESPAsyncWebServer |
+| ESPAsyncWiFiManager.h | WifiManager 2.0.3 alpha |
+| AsyncTelegram.h | Ver. 1.1.3 |
+| ArduinoJson.h | Ver 6.15.1 |
+| ThingSpeak.h | Ver 2.0.1 |
+| TimeLib.h | Ver 1.6.1 |
+| ArduinoOTA.h | ....... |
+
 <h3>Software istruction</h3>
 
 <p>First you need to register the service (free but with some limitations) here:  <a href="https://thingspeak.com">www.thingspeak.com</a>. 
@@ -86,7 +89,8 @@ The other fields are not currently used.
 After modifying the file, you can upload it using the "upload file" function on the setting page. The changes will take effect immediately.
 
 
-
+##Firmware OTA update (Over The Air)
+You can now also update the firmware in the card via the **OTA (Over The Air)** feature. In fact, it is no longer necessary to connect it to the PC but through the Arduino IDE it can be updated remotely. Just select the network port in the menu: *tools -> port -> Network Ports*
 
 <h2><strong>+ NEWS +  Enabled a Telegram bot to be able to interrogate the sensor </strong></h2>
 First of all you need to create a bot on the Telegram with <b>BothFather</b> function. The procedure 
