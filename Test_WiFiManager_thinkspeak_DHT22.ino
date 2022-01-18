@@ -13,7 +13,8 @@
 #include "AsyncTelegram.h"      // ver 1.1.3
 #include <ArduinoJson.h>        // ver 6.15.1
 #include "ThingSpeak.h"         // ver 1.5.0 -> 2.0.1
-#include <TimeLib.h>            // ver 1.6.1   
+#include <TimeLib.h>            // ver 1.6.1
+#include <ArduinoOTA.h>   
 #include <math.h>
        
 #include "utility.h"
@@ -37,13 +38,13 @@ String         user;
 String         hostName="myesp";
 AsyncWebServer server(80);
 DNSServer      dns;
-sensors_event_t event;
+//sensors_event_t event;
 float lastTemperatureRead = 0.0;
 float lastHumidityRead = 0.0;
 AsyncTelegram myBot;
 TBMessage msg;
 String stato=" ESP start"; // stato corrente del sistema
-String statoIp=stato;
+//String statoIp=stato;
 int count=0;//14800000 * rateo;  
 //float rateo = 1.57; // costante per regolare l'intervallo delle letture
 
@@ -75,7 +76,7 @@ void configModeCallback (AsyncWiFiManager  *myWiFiManager) {
 }
  
 void setup() {
-  setTime(05,58,00,9,1,2022); // inserisco una data fittizia dal quale calcolare i timer, 5 min prima dalla prima lettura
+  setTime(05,58,00,18,1,2022); // inserisco una data fittizia dal quale calcolare i timer, 5 min prima dalla prima lettura
   count = minute(); // setto al minuto del tempo impostato
   Serial.begin(57600);
   SPIFFS.begin();   // Start the SPI Flash Files System
@@ -210,54 +211,76 @@ void setup() {
   if (myBot.begin()){
     Serial.println("Telegram OK");
     //alla fine mandi un messaggio al bot telegram dopo un'attesa di 2 sec
-    delay(2000);
+    //delay(2000);
     String replay = "Avvio " + boardName;
     myBot.sendMessage(msg, replay);
   } else {
     Serial.println("Telegram NO OK");
   }
+
+  // Prepare OTA handler
+  ArduinoOTA.onStart([]() {
+    Serial.println("Start");
+  });
+  ArduinoOTA.onEnd([]() {
+    Serial.println("\nEnd");
+  });
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+  });
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("Error[%u]: ", error);
+    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+  });
+
+  //ArduinoOTA.setHostname(&hostName); // Give port a name not just address
+  ArduinoOTA.begin();
   
 } // end setup
 
 void loop() {
   MDNS.update();
-  //sensors_event_t event;
+  ArduinoOTA.handle();
+  sensors_event_t event;
 
   if (WiFi.status() != WL_CONNECTED) ESP.reset(); // verifica lo stato della  connessione
 
-  if (stato!="---") statoIp=stato; // conserva l'ultimo stato utile da riportare sul web
-    else statoIp="All ok";
-  
-  //if (count==(15000000 * rateo)){  // 5 milioni sono circa 1 minuto (150.000.000
-  if((minute()==59 || minute()== 29) && (second()==0)){ //alla mezz'ora e al cambio ora leggo temperatura e umidità
+  if(((minute()==59) || (minute()== 29)) && (second()==0)){ //alla mezz'ora e al cambio ora leggo temperatura 
     dht.temperature().getEvent(&event);
     float temp = event.temperature;
     if (isnan(event.temperature)) { // se errore lettura temperatura
       Serial.println(F("Error reading temperature!"));
       stato=stato+" Error reading temperature";
-      setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettuta      
+      setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettura
     } else {
       Serial.print(F("Temperatura: "));
       Serial.print(temp);
       Serial.println(F("°C"));
+      stato=stato+" Read Temperature ok! ";
       lastTemperatureRead = temp;
+      delay(1100); //attendo un secondo per uscire da questa condizione
     }
-    delay(1000);    
+  }
+  if(((minute()==59) || (minute()== 29)) && (second()==5)){ //alla mezz'ora e al cambio ora leggo  umidità      
     dht.humidity().getEvent(&event);
     float hum=event.relative_humidity;
     if (isnan(event.relative_humidity)) { // se errore lettura umidità
       Serial.println(F("Error reading humidity!"));
       stato=stato+" Error reading humidity";
-      setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettuta    
+      setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettura    
     } else {
       Serial.print(F("Umidità: "));
       Serial.print(hum);
       Serial.println(F("%"));
       Serial.println("lettura dati ok!!!");
-      stato=stato+"Read data ok";
+      stato=stato+" -> Read data ok ";
       ThingSpeak.setStatus(stato);
-      //stato="---"; // azzera lo stato
       lastHumidityRead = hum;
+      delay(1100); //attendo un secondo per uscire da questa condizione
     }
   }    
   /*
@@ -290,10 +313,8 @@ void loop() {
     int x = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
     if(x == 200){
       Serial.println("Channel update successful.");
-      stato="-"+String(x)+"-"; // azzera lo stato
-      //statoIP+=" ch update ok";
-      //count=0;
-      delay(1000);
+      stato="Data updated ("+String(x)+")"; // azzera lo stato
+      delay(1100); //attendo un secondo per uscire da questa condizione
     } else {
       Serial.println("Problem updating channel. HTTP error  " + msgFeedBack(x)); 
       stato=stato+"* Problem updating channel. HTTP error " + msgFeedBack(x)+" --- "; 
@@ -309,7 +330,7 @@ void loop() {
       String replay = "Ciao " + String(msg.sender.firstName) + "!!!\nGli ultimi dati letti:";
       replay += "\nLast temperature: " + String(lastTemperatureRead) + "°C";
       replay += "\nLast humidity: " + String(lastHumidityRead) + "%";
-      double s = lastTemperatureRead - 37.25*(2 - log10(double(lastHumidityRead)));
+      double s = lastTemperatureRead - 37.25*(2 - log10(double(lastHumidityRead))); // punto di rugiada
       replay += "\nDev point: " + String(s); 
       myBot.sendMessage(msg, replay );
     } // read
@@ -458,7 +479,7 @@ void dirRequest (AsyncWebServerRequest *request){
       infosys.add(String("Count down:      -" + String(60-second()) + " sec"));
     }
     //infosys.add(String("Rateo:           " + String(rateo)));
-    infosys.add(String("Status:          " + statoIp + ""));
+    infosys.add(String("Last stato:      " + stato + ""));
     doc["RSSI"] = String(WiFi.RSSI());
     doc["SSID"] = String(WiFi.SSID());
     doc["Board_Name"] = boardName;
