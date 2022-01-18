@@ -6,7 +6,7 @@
 </p>
 <p>The DHT22 module, thanks to its sensors, can detect the temperature and humidity of the surrounding environment, and send this data to the Wemos board which, thanks to its wifi module, can transmit them to a PC or smartphone.</p>
 
-In this case, thanks to code inside (sketch), the data is sent to a web platform (www.thingspeak.com) and displayed through graphics. Moreover, these and other data can be viewed on all network devices because the wemos card works as a <strong>web-server </strong>(see below)
+In this case, thanks to code inside (sketch), the data is sent to a web platform (www.thingspeak.com) and displayed through graphics. Moreover, these and other data can be viewed on all network devices because the Wemos card works as a <strong>web-server </strong>([see below](#software-istruction))
 
 
 [This is my chanel were data are sent ](https://thingspeak.com/channels/867219).  The data are in real-time
@@ -33,7 +33,7 @@ In this case, thanks to code inside (sketch), the data is sent to a web platform
 <ul>
 <li><p> <a href="https://www.banggood.com/Geekcreit-D1-mini-V2_2_0-WIFI-Internet-Development-Board-Based-ESP8266-4MB-FLASH-ESP-12S-Chip-p-1143874.html?p=MX1504307245201310VT&custlinkid=673886">Wemos D1 mini clone based on ESP8266 chip </a></p></li>
 <li><p> <a href="https://www.banggood.com/AM2302-DHT22-Temperature-And-Humidity-Sensor-Module-For-Arduino-SCM-p-937403.html?rmmds=search&cur_warehouse=CN">DHT 22 sensor (temeperature & Humidity)</a></p></li>
-<li><p> <a href="https://www.thingiverse.com/thing:3965015">My printable case project on Thingiverse.com</a></p></li>
+<li><p> <a href="https://www.thingiverse.com/thing:3965015">My printable case project on Thingiverse.com (optional)</a></p></li>
 </ul>
 </blockquote>
 
@@ -41,7 +41,7 @@ In this case, thanks to code inside (sketch), the data is sent to a web platform
 
 <p>First you need to register the service (free but with some limitations) here:  <a href="https://thingspeak.com">www.thingspeak.com</a>. 
 <br> 
- So,  download the code for Arduino from the <a href="https://github.com/birrozza/esp_8266_T-H">link</a> above.
+ So,  download the code for Arduino from this repository.
 <br>
 With the Arduino IDE, you must enter in the <b><em>secret.h</em></b> file and update the <em><strong>Channel ID</em></strong> and the <em><strong>Channel Write Key</strong></em> values whith obtained when the service was activated on Thingspeak.</p>
 
