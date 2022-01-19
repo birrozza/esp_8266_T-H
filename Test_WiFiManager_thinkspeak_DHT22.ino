@@ -2,6 +2,7 @@
   - per ESP8266 clone WeMos D1 R1 usare LOLIN(WeMos) D1 R1
   - esp core 3.0.2 funzionante con telegram https://github.com/esp8266/Arduino
   - driver esp8266 http://www.wch.cn/download/CH341SER_ZIP.html
+  - Markdown editor https://pandao.github.io/editor.md/en.html  o  https://stackedit.io/
 */
 #include "ESP8266WiFi.h"        // library ESP8266 Arduino Core (ver 3.0.2)
 #include "Ticker.h"             // library ESP8266 Arduino Core (ver 3.0.2)
@@ -12,7 +13,7 @@
 #include "ESPAsyncWiFiManager.h"// WifiManager 2.0.3 alpha
 #include "AsyncTelegram.h"      // ver 1.1.3
 #include <ArduinoJson.h>        // ver 6.15.1
-#include "ThingSpeak.h"         // ver 1.5.0 -> 2.0.1
+#include "ThingSpeak.h"         // ver 2.0.1
 #include <TimeLib.h>            // ver 1.6.1
 #include <ArduinoOTA.h>   
 #include <math.h>
@@ -38,29 +39,24 @@ String         user;
 String         hostName="myesp";
 AsyncWebServer server(80);
 DNSServer      dns;
-//sensors_event_t event;
 float lastTemperatureRead = 0.0;
 float lastHumidityRead = 0.0;
 AsyncTelegram myBot;
 TBMessage msg;
 String stato=" ESP start"; // stato corrente del sistema
 //String statoIp=stato;
-int count=0;//14800000 * rateo;  
-//float rateo = 1.57; // costante per regolare l'intervallo delle letture
+int count=0;  
 
-//for LED status
-Ticker ticker;
+Ticker ticker; //for LED status
 
-
-  // function prototypes for HTTP handlers
+// function prototypes for HTTP handlers
 void dirRequest (AsyncWebServerRequest *request);
 void handleLogin(AsyncWebServerRequest *request);
 void handleIpRequest(AsyncWebServerRequest *request);
 void handleFileUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final); 
 
 //// metodi
-void tick() {
-  //toggle state
+void tick() { //toggle state
   int state = digitalRead(BUILTIN_LED);
   digitalWrite(BUILTIN_LED, !state);
 }
@@ -93,16 +89,14 @@ void setup() {
   hostName = String(doc["board"]["local_host_name"]);
   user = String(doc["login"]["user"]);
   password = String(doc["login"]["password"]);
-  //rateo = float(doc["board"]["rateo"]);
-  
+    
   //myChannelNumber = (doc["thinkspeak"]["id"]);
   //myWriteAPIKey = (doc["thinkspeak"]["api_key"]);
   //const char* token = (doc["Telegram_bot"]["token"]);
     
   //set led pin as output
   pinMode(BUILTIN_LED, OUTPUT);
-  // start ticker with 0.5 because we start in AP mode and try to connect
-  ticker.attach(0.6, tick);
+  ticker.attach(0.6, tick); // start ticker with 0.5 because we start in AP mode and try to connect
  
   //WiFiManager
   //Local intialization. Once its business is done,
@@ -207,7 +201,6 @@ void setup() {
   myBot.setTelegramToken(token);
   // Check if all things are ok
   Serial.print("\nTest Telegram connection... ");
-  //myBot.begin() ? Serial.println("Telegram OK") : Serial.println("Telegram NO OK");
   if (myBot.begin()){
     Serial.println("Telegram OK");
     //alla fine mandi un messaggio al bot telegram dopo un'attesa di 2 sec
@@ -237,7 +230,7 @@ void setup() {
     else if (error == OTA_END_ERROR) Serial.println("End Failed");
   });
 
-  //ArduinoOTA.setHostname(&hostName); // Give port a name not just address
+  ArduinoOTA.setHostname((const char *)hostName.c_str());
   ArduinoOTA.begin();
   
 } // end setup
@@ -245,6 +238,7 @@ void setup() {
 void loop() {
   MDNS.update();
   ArduinoOTA.handle();
+  
   sensors_event_t event;
 
   if (WiFi.status() != WL_CONNECTED) ESP.reset(); // verifica lo stato della  connessione
@@ -283,30 +277,6 @@ void loop() {
       delay(1100); //attendo un secondo per uscire da questa condizione
     }
   }    
-  /*
-  //if (count==(15050000 * rateo)) {  
-  if((minute()==2 || minute()== 32) && (second()==0)){ // dopo due minuti leggo umidità
-    dht.humidity().getEvent(&event);
-    if (isnan(event.relative_humidity)) {
-      Serial.println(F("Error reading humidity!"));
-      //count-=2000 * rateo;
-      stato=stato+" Error reading humidity";
-      setTime(now()-60);// porto indietro di 1 min l'orologio se ci sono problemi nella lettuta
-    } else {
-      float hum=event.relative_humidity;//0.9-34.6; // per calibrare il valore dell'umidità
-      Serial.print(F("Umidità: "));
-      Serial.print(hum);
-      Serial.println(F("%"));
-      // Write value to Field 1 of a ThingSpeak Channel
-      //ThingSpeak.setField(2, hum);
-      stato=stato+" Read Hum ok";
-      ThingSpeak.setStatus(stato);
-      stato="---"; // azzera lo stato
-      lastHumidityRead = hum;
-    } 
-  }
-  */
-  //if (count>=(15950000 * rateo)) {  // garantisce una lettura quasi ogni 30 minuti
   if((minute()==0 || minute()== 30) && (second()==0)){ // dopo altri due minuti invia la lettura
     ThingSpeak.setField(1, lastTemperatureRead);
     ThingSpeak.setField(2, lastHumidityRead);
@@ -478,14 +448,12 @@ void dirRequest (AsyncWebServerRequest *request){
     } else{ // se è all'ultimo minuto conta i secondi 
       infosys.add(String("Count down:      -" + String(60-second()) + " sec"));
     }
-    //infosys.add(String("Rateo:           " + String(rateo)));
     infosys.add(String("Last stato:      " + stato + ""));
     doc["RSSI"] = String(WiFi.RSSI());
     doc["SSID"] = String(WiFi.SSID());
     doc["Board_Name"] = boardName;
     doc["Temperature"] = String(lastTemperatureRead);
     doc["Humidity"] = String(lastHumidityRead);
-    //doc["Rateo"] = rateo;
     doc["Host_name"] = hostName;
     doc["Count"]= count;
     //doc["bot"] = myBot.begin(); //inchioda la scheda
