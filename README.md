@@ -55,7 +55,7 @@ Choose one of the access points scanned, enter password, click save.
 ESP will try to connect. If successful, it relinquishes control back to your app. If not, reconnect to AP and reconfigure.
 [Here this tutorial](https://github.com/alanswx/ESPAsyncWiFiManager).
 
-Once the wifi connection is made, the card is now reachable on our network. It is sufficient to type in the address bar of the browser the url <b>http://myesp.local</b> to be able to be able to navigate between the sensor pages. The host name is the default but can be changed in the _config.json_ file ([see below](#configuration)).  
+Once the wifi connection is made, the card is now reachable on our network. It is sufficient to type in the address bar of the browser the url <b>http://myesp.local</b> to be able to navigate between the sensor pages. The host name is the default but can be changed in the _config.json_ file ([see below](#configuration)).  
 
 In the <b>landing</b> page the access data (<b>user</b> & <b>password</b>) are available as tip by passing the pointer over the fields. They are editable via the _config.json_ file.
 
