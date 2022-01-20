@@ -43,8 +43,7 @@ float lastTemperatureRead = 0.0;
 float lastHumidityRead = 0.0;
 AsyncTelegram myBot;
 TBMessage msg;
-String stato=" ESP start"; // stato corrente del sistema
-//String statoIp=stato;
+String stato="*ESP start"; // stato corrente del sistema
 int count=0;  
 
 Ticker ticker; //for LED status
@@ -90,8 +89,8 @@ void setup() {
   user = String(doc["login"]["user"]);
   password = String(doc["login"]["password"]);
     
-  //myChannelNumber = (doc["thinkspeak"]["id"]);
-  //myWriteAPIKey = (doc["thinkspeak"]["api_key"]);
+  //myChannelNumber = (doc["thingspeak"]["id"]);
+  //myWriteAPIKey = (doc["thingspeak"]["api_key"]);
   //const char* token = (doc["Telegram_bot"]["token"]);
     
   //set led pin as output
@@ -343,8 +342,8 @@ void handleIpRequest(AsyncWebServerRequest *request){ // invia json con ip, city
   rispostaJson["ip"] = WiFi.localIP().toString();
   rispostaJson["city"] = doc["location"]["city"];
   rispostaJson["country"] = doc["location"]["country"];
-  rispostaJson["temp"] = doc["thinkspeak"]["field_1"]["url"];
-  rispostaJson["humi"] = doc["thinkspeak"]["field_2"]["url"];
+  rispostaJson["temp"] = doc["thingspeak"]["field_1"]["url"];
+  rispostaJson["humi"] = doc["thingspeak"]["field_2"]["url"];
   
   serializeJson(rispostaJson, json); // da json a stringa per l'invio
   //Serial.print('json: ' + json);
