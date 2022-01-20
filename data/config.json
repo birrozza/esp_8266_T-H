@@ -3,7 +3,7 @@
         "board_id": "ESP-BD13A8", 
         "type": "ESP8266",
         "local_host_name": "myesp", 
-        "rateo": "1.50"
+        "rateo": "0.0"
     },
     "login": { 
         "user": "Heineken",
@@ -13,10 +13,10 @@
         "city": "Taranto",
         "country": "Italy"
     },
-    "thinkspeak": {
+    "thingspeak": {
         "secret_key": {
             "id": 0,
-            "api_key": "non_usato"
+            "api_key": "######"
         },
         "field_1": {
             "name": "temperature",
