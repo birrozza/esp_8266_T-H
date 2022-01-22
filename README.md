@@ -2,11 +2,13 @@
 <p>
 <img alt="GitHub" src="https://img.shields.io/github/license/birrozza/esp_8266_T-H">
 <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/birrozza/esp_8266_T-H/total">
-
+<img alt="AUR last modified" src="https://img.shields.io/aur/last-modified/esp_8266_T-H">
 </p>
+
 <p>The DHT22 module, thanks to its sensors, can detect the temperature and humidity of the surrounding environment, and send this data to the Wemos board which, thanks to its wifi module, can transmit them to a PC or smartphone.</p>
 
-In this case, thanks to code inside (sketch), the data is sent to a web platform (www.thingspeak.com) and displayed through graphics. Moreover, these and other data can be viewed on all network devices because the Wemos card works as a <strong>web-server </strong>([see below](#software-istruction)).
+### Feautures
+Thanks to code inside (sketch), the data is sent to a web platform (www.thingspeak.com) and displayed through graphics. Moreover, these and other data can be viewed on all network devices because the Wemos card works as a <strong>web-server </strong>([see below](#software-istruction)). It is possible to activate a **bot** on a **Telegram** with which to remotely interrogate the sensor ([see below](#Enable-a-Telegram-bot-to-be-able-to-interrogate-the-sensor)).
 
 
 [This is my chanel were data are sent ](https://thingspeak.com/channels/867219).  The data are in real-time
@@ -32,7 +34,7 @@ In this case, thanks to code inside (sketch), the data is sent to a web platform
 <blockquote>
 <ul>
 <li><p> <a href="https://www.banggood.com/Geekcreit-D1-mini-V2_2_0-WIFI-Internet-Development-Board-Based-ESP8266-4MB-FLASH-ESP-12S-Chip-p-1143874.html?p=MX1504307245201310VT&custlinkid=673886">Wemos D1 mini clone based on ESP8266 chip </a></p></li>
-<li><p> <a href="https://www.banggood.com/AM2302-DHT22-Temperature-And-Humidity-Sensor-Module-For-Arduino-SCM-p-937403.html?rmmds=search&cur_warehouse=CN">DHT 22 sensor (temeperature & Humidity)</a></p></li>
+<li><p> <a href="https://www.banggood.com/AM2302-DHT22-Temperature-And-Humidity-Sensor-Module-For-Arduino-SCM-p-937403.html?rmmds=search&cur_warehouse=CN">DHT 22 sensor (temperature & humidity)</a></p></li>
 <li><p> <a href="https://www.thingiverse.com/thing:3965015">My printable case project on Thingiverse.com (optional)</a></p></li>
 </ul>
 </blockquote>
@@ -96,7 +98,7 @@ After modifying the file, you can upload it using the "_upload file_" function o
 ### Firmware OTA update (Over The Air)
 You can now also update the firmware in the card via the **OTA (Over The Air)** feature. In fact, it is no longer necessary to connect it to the PC but through the Arduino IDE it can be updated remotely. Just select the network port in the menu: *tools -> port -> Network Ports*.
 
-<h2><strong>+ NEWS +  Enabled a Telegram bot to be able to interrogate the sensor </strong></h2>
+<h2>Enable a Telegram bot to be able to interrogate the sensor</h2>
 First of all you need to create a bot on the Telegram with <b>BothFather</b> function. The procedure 
 can be found at this <a href="https://core.telegram.org/bots#6-botfather">link</a>.
 
