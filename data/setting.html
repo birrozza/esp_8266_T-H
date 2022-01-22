@@ -80,9 +80,10 @@
         p.rssi{
           color: yellow;
           border-color: yellow;
+          width: 120px;       
+          text-align: center;   
         }
         h1.intestazione{
-            
             letter-spacing: 1px;
             text-transform: uppercase;
             border-radius: 1em;
@@ -136,6 +137,16 @@
     <!-- for the most recent version of the "flat" theme -->
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/zebra_dialog@latest/dist/css/materialize/zebra_dialog.min.css">
+    <script type="text/javascript">
+          /*
+          $(document).ready(function animateHeart() {
+              $('.rssi').animate({
+                  fontSize: $('.rssi').css('fontSize') == '13px' ? '16px' : '13px'
+              }, 1000, animateHeart);
+          });
+          */
+    </script>
+    
     <script>
       //script for Zebra_dialog
       $(document).ready(function(){
@@ -233,9 +244,17 @@
         const temp        = document.getElementById('temp');
         const humid       = document.getElementById('humid'); 
         
-        let rateo = 1.57;
+        let heart = true; // flag for heartbeat animation
+        let pxRSSI = '13px'; 
         var uniqueURL = "/directory"; 
         
+        $(document).ready(function animateHeart() {
+              if(heart) pxRSSI='13px'
+                else pxRSSI='16px';
+              $('.rssi').animate({
+                fontSize: $('.rssi').css('fontSize') == pxRSSI ? '16px' : pxRSSI
+              }, 1000, animateHeart);
+          });
         refresh();
         setInterval(refresh, 5000 );
         
@@ -257,48 +276,24 @@
                     boardName.textContent= "Board: " + json['Board_Name']; 
                     temp.textContent     = "Temp.: " + json['Temperature'] + '°C';
                     humid.textContent    = "Humid.: " + json['Humidity'] + "%"; 
-                    //rateo = json["Rateo"];
                     textArea ="Info system: \n";
                     const sysinfo = json['infosys'];  // indico 
                     for (let i = 0; i<sysinfo.length; i++) {
                         let br="\n";
                         let strForCount = ''; // usata
-                        // trova la parola Count
-                        /* 
-                        if (sysinfo[i].indexOf('Count')!== -1) { //se il campo è quello giusto (non è diversa) 
-                            let stringa= sysinfo[i].slice(7); // metti nella variabile stringa l'ultima parte  
-                            //console.log(String(parseInt(stringa)/(15950000*rateo)*100).slice(0,4));
-                            //quindi converti in int, fai i calcoli e metti tutto in strForCount
-                            strForCount = ' (' + String(parseInt(stringa)/(15950000*rateo)*100).slice(0,4)+'%)';
-                        }
-                        */
                         if (i===(sysinfo.length-1)) br=""; // se è ultimo elemento non metti il capo linea (-1 perchè parte da 0 l'indice)
                         textArea += sysinfo[i]+strForCount+br;    
                     }
                     infTextArea.value = textArea;
                     console.log("ok");
                     rssi.setAttribute("style","color: green; border-color: green;");
-                    
-                }).catch (function (err) {
+                    heart=1; // abilita heartbeat
+            }).catch (function (err) {
                     rssi.setAttribute("style","border-color: red; color: red;");
-                    
+                    heart=false; //disabilita heartbeat
                     console.log('Fetch problem: ' + err.message);
             });
         }
-        /*  
-        var request   = new XMLHttpRequest();         
-        request.onreadystatechange = function() {
-            if (this.readyState == 4) {
-                if (this.status == 200) {
-                    if (this.responseText!=null) {
-                        document.getElementById("dirtextarea").innerHTML = this.responseText;
-                    }
-                }
-            }
-        }
-        request.open("POST", uniqueURL, false);
-        request.send();
-        */      
     </script>
   </body>
 </html>
