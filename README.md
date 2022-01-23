@@ -5,6 +5,8 @@
 <img alt="AUR last modified" src="https://img.shields.io/aur/last-modified/esp_8266_T-H">
 </p>
 
+![](/images/login_page.png)
+
 <p>The DHT22 module, thanks to its sensors, can detect the temperature and humidity of the surrounding environment, and send this data to the Wemos board which, thanks to its wifi module, can transmit them to a PC or smartphone.</p>
 
 ### Feautures
@@ -99,6 +101,9 @@ After modifying the file, you can upload it using the "_upload file_" function o
 You can now also update the firmware in the card via the **OTA (Over The Air)** feature. In fact, it is no longer necessary to connect it to the PC but through the Arduino IDE it can be updated remotely. Just select the network port in the menu: *tools -> port -> Network Ports*.
 
 <h2>Enable a Telegram bot to be able to interrogate the sensor</h2>
+
+![](/images/telegram.jpg)
+
 First of all you need to create a bot on the Telegram with <b>BothFather</b> function. The procedure 
 can be found at this <a href="https://core.telegram.org/bots#6-botfather">link</a>.
 
@@ -108,7 +113,8 @@ Through the bot, you can interrogate the sensor with commands:
 <ul>
     <li><b>"<em>read</em>"</b>:  returns the latest temperature and humidity reading;</li>
     <li><b>"<em>wifi</em>"</b>:  returns the parameters of the wifi connection;</li>
-    <li><b>"<em>stato</em>"</b>: returns the last status of the data transmission to ThingSpeak.</li>
+    <li><b>"<em>stato</em>"</b>: returns the last status of the data transmission to ThingSpeak;</li>
+    <li><b>"<em>reset</em>"</b>: reboot the card.</li>
 </ul> 
 <br>
 <strong>Stay tuned!!! (last update January 2022)</strong>
