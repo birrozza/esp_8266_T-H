@@ -49,6 +49,11 @@ Thanks to code inside (sketch), the data is sent to a web platform (www.thingspe
 <br>
 With the Arduino IDE, you must enter in the <b><em>secret.h</em></b> file and update the <em><strong>Channel ID</em></strong> and the <em><strong>Channel Write Key</strong></em> values whith obtained when the service was activated on Thingspeak.</p>
 
+![](/images/comment.png)
+
+<b>Very important note</b>: to have the Arduino IDE compile the <b><em>secret.h</em></b> file you need to modify the sketch following the instructions in the comments.
+
+
 In this project, in addition to managing the DHT22 sensor, the Wemos card also acts as a <strong>web-server</strong>. For this purpose, <strong>web pages</strong> have been created which function as a user interface. These must be loaded into the SPIFFS of the ESP8266. Here the plug-in about it [ESP8266 Sketch Data Upload](https://github.com/esp8266/arduino-esp8266fs-plugin).
 
 When your ESP starts up, it sets it up in Station mode and tries to connect to a previously saved Access Point.
