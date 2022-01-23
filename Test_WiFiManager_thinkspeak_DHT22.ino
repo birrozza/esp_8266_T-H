@@ -71,7 +71,7 @@ void configModeCallback (AsyncWiFiManager  *myWiFiManager) {
 }
  
 void setup() {
-  setTime(05,58,00,18,1,2022); // inserisco una data fittizia dal quale calcolare i timer, 5 min prima dalla prima lettura
+  setTime(14,58,00,22,1,2022); // inserisco una data fittizia dal quale calcolare i timer, 5 min prima dalla prima lettura
   count = minute(); // setto al minuto del tempo impostato
   Serial.begin(57600);
   SPIFFS.begin();   // Start the SPI Flash Files System
@@ -237,12 +237,14 @@ void setup() {
 void loop() {
   MDNS.update();
   ArduinoOTA.handle();
+
   
   sensors_event_t event;
 
   if (WiFi.status() != WL_CONNECTED) ESP.reset(); // verifica lo stato della  connessione
-
-  if(((minute()==59) || (minute()== 29)) && (second()==0)){ //alla mezz'ora e al cambio ora leggo temperatura 
+  static bool enableTemperature = true;
+  static bool enableHumidityRead = true;
+  if(((minute()==59) || (minute()== 29)) && (second()==0) && enableTemperature){ //alla mezz'ora e al cambio ora leggo temperatura 
     dht.temperature().getEvent(&event);
     float temp = event.temperature;
     if (isnan(event.temperature)) { // se errore lettura temperatura
@@ -253,43 +255,47 @@ void loop() {
       Serial.print(F("Temperatura: "));
       Serial.print(temp);
       Serial.println(F("°C"));
-      stato=stato+" Read Temperature ok! ";
+      stato=stato+"[Temp ok ("+String(hour())+":"+String(minute())+":"+String(second())+")]";
       lastTemperatureRead = temp;
-      delay(1100); //attendo un secondo per uscire da questa condizione
+      enableTemperature = false;
+      //delay(1100); //attendo un secondo per uscire da questa condizione
     }
   }
-  if(((minute()==59) || (minute()== 29)) && (second()==5)){ //alla mezz'ora e al cambio ora leggo  umidità      
+  if(((minute()==59) || (minute()== 29)) && (second()==5) && enableHumidityRead){ //alla mezz'ora e al cambio ora leggo  umidità      
     dht.humidity().getEvent(&event);
     float hum=event.relative_humidity;
     if (isnan(event.relative_humidity)) { // se errore lettura umidità
       Serial.println(F("Error reading humidity!"));
       stato=stato+" Error reading humidity";
-      setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettura    
+      setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettura 
+      enableTemperature = true;   
     } else {
       Serial.print(F("Umidità: "));
       Serial.print(hum);
       Serial.println(F("%"));
       Serial.println("lettura dati ok!!!");
-      stato=stato+" -> Read data ok ";
+      stato=stato+"[Read data ok ("+String(hour())+":"+String(minute())+":"+String(second())+")]";
       ThingSpeak.setStatus(stato);
       lastHumidityRead = hum;
-      delay(1100); //attendo un secondo per uscire da questa condizione
+      enableHumidityRead = false;
+      //delay(1100); //attendo un secondo per uscire da questa condizione
     }
   }    
-  if((minute()==0 || minute()== 30) && (second()==0)){ // dopo altri due minuti invia la lettura
+  if(((minute()==0) || (minute()== 30)) && (second()==0)){ // dopo altri due minuti invia la lettura
     ThingSpeak.setField(1, lastTemperatureRead);
     ThingSpeak.setField(2, lastHumidityRead);
     int x = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
     if(x == 200){
       Serial.println("Channel update successful.");
-      stato="Data updated ("+String(x)+")"; // azzera lo stato
+      stato="[Data updated ("+String(x)+")]"; // azzera lo stato
       delay(1100); //attendo un secondo per uscire da questa condizione
     } else {
       Serial.println("Problem updating channel. HTTP error  " + msgFeedBack(x)); 
-      stato=stato+"* Problem updating channel. HTTP error " + msgFeedBack(x)+" --- "; 
-      //count=14000000 * rateo; // se ci sono problemi nell'aggiornamento dei dati, fa tutto nuovamente
+      stato=stato+"* Problem updating. Error " + msgFeedBack(x)+" --- "; 
       setTime(now()-120); // se ci sono problemi riporta indietro il tempo di 2 min e ricomincia daccapo
     }
+    enableTemperature = true;
+    enableHumidityRead = true;
   }
   count=minute()>=30? 60-minute():30-minute(); // countdown in base al minuto
   
