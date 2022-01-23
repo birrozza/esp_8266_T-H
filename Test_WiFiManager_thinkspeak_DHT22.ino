@@ -23,7 +23,6 @@
 //#include "secret.h" // uncomment if it's commented out
 #include "sensore_DHT_22.h"     //  
 #include "testiHTML.h" // la sintassi HTML con indentazione leggibile
-//#include "letturaSPIFFS.h"
 
 #define GOOGLE_SHEET_ENABLED //video 529
 #define TELEGRAM_BOT_ENABLED
@@ -42,7 +41,6 @@ DNSServer      dns;
 float lastTemperatureRead = 0.0;
 float lastHumidityRead = 0.0;
 AsyncTelegram myBot;
-TBMessage msg;
 String stato="*ESP start"; // stato corrente del sistema
 int count=0;  
 
@@ -71,7 +69,7 @@ void configModeCallback (AsyncWiFiManager  *myWiFiManager) {
 }
  
 void setup() {
-  setTime(14,58,00,22,1,2022); // inserisco una data fittizia dal quale calcolare i timer, 5 min prima dalla prima lettura
+  setTime(16,45,00,23,1,2022); // inserisco una data fittizia dal quale calcolare i timer, 5 min prima dalla prima lettura
   count = minute(); // setto al minuto del tempo impostato
   Serial.begin(57600);
   SPIFFS.begin();   // Start the SPI Flash Files System
@@ -198,14 +196,15 @@ void setup() {
   myBot.setClock("CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00");  //CET-1CEST,M3.5.0,M10.5.0/3
   myBot.setUpdateTime(2000);
   myBot.setTelegramToken(token);
+    
   // Check if all things are ok
   Serial.print("\nTest Telegram connection... ");
   if (myBot.begin()){
     Serial.println("Telegram OK");
     //alla fine mandi un messaggio al bot telegram dopo un'attesa di 2 sec
     //delay(2000);
-    String replay = "Avvio " + boardName;
-    myBot.sendMessage(msg, replay);
+    //String replay = "Avvio " + boardName;
+    //myBot.sendMessage(msg, replay);
   } else {
     Serial.println("Telegram NO OK");
   }
@@ -237,7 +236,7 @@ void setup() {
 void loop() {
   MDNS.update();
   ArduinoOTA.handle();
-
+  TBMessage msg;
   
   sensors_event_t event;
 
@@ -291,7 +290,7 @@ void loop() {
       delay(1100); //attendo un secondo per uscire da questa condizione
     } else {
       Serial.println("Problem updating channel. HTTP error  " + msgFeedBack(x)); 
-      stato=stato+"* Problem updating. Error " + msgFeedBack(x)+" --- "; 
+      stato=stato+"* Problem updating. Err. Code " + msgFeedBack(x)+" *"; 
       setTime(now()-120); // se ci sono problemi riporta indietro il tempo di 2 min e ricomincia daccapo
     }
     enableTemperature = true;
@@ -325,7 +324,7 @@ void loop() {
       ESP.reset();
     } // reset
     else {
-      String replay = "Ciao!!! \nScelte disponibili:\n- read -> temp & Humidity;\n- wifi -> wifi status;\n- stato -> stato.";
+      String replay = "Ciao!!! \nChoices available:\n- read -> temp & Humidity;\n- wifi -> wifi status;\n- stato -> stato;\n- reset -> to reset card.";
       myBot.sendMessage(msg, replay);
     }
   } // end telegram bot
