@@ -120,7 +120,8 @@ Through the bot, you can interrogate the sensor with commands:
     <li><b>"<em>reset</em>"</b>: reboot the card.</li>
 </ul> 
 <br>
-###Project version for BME280 sensor###
+
+### Project version for BME280 sensor
 Of this project there is also the version for DHT22 sensors. However, only the temperature and humidity can be read with these sensors. you can find it in the repository: https://github.com/birrozza/ESP8266_Sensor_BME280
 
 <br>
