@@ -4,6 +4,8 @@
   - driver esp8266 http://www.wch.cn/download/CH341SER_ZIP.html
   - Markdown editor https://pandao.github.io/editor.md/en.html  o  https://stackedit.io/
 */
+#include <NTPClient.h>          // https://github.com/arduino-libraries/NTPClient (v 3.2.0)
+#include <WiFiUdp.h>            // library ESP8266 Arduino Core (ver 3.0.2)
 #include "ESP8266WiFi.h"        // library ESP8266 Arduino Core (ver 3.0.2)
 #include "Ticker.h"             // library ESP8266 Arduino Core (ver 3.0.2)
 #include "ESP8266mDNS.h"        // library ESP8266 Arduino Core (ver 3.0.2)
@@ -44,6 +46,10 @@ AsyncTelegram myBot;
 String stato="*ESP start"; // stato corrente del sistema
 int count=0;  
 
+// Define NTP Client to get time
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600);
+
 Ticker ticker; //for LED status
 
 // function prototypes for HTTP handlers
@@ -69,8 +75,8 @@ void configModeCallback (AsyncWiFiManager  *myWiFiManager) {
 }
  
 void setup() {
-  setTime(16,45,00,23,1,2022); // inserisco una data fittizia dal quale calcolare i timer, 5 min prima dalla prima lettura
-  count = minute(); // setto al minuto del tempo impostato
+  timeClient.begin();
+  
   Serial.begin(57600);
   SPIFFS.begin();   // Start the SPI Flash Files System
   
@@ -205,7 +211,7 @@ void setup() {
     //delay(2000);
     //String replay = "Avvio " + boardName;
     //myBot.sendMessage(msg, replay);
-  } else {
+  } else { 
     Serial.println("Telegram NO OK");
   }
 
@@ -233,17 +239,26 @@ void setup() {
   
 } // end setup
 
+int seTimeOk = 0;
+
 void loop() {
   MDNS.update();
   ArduinoOTA.handle();
   TBMessage msg;
-  
+  timeClient.update();
+
+  if (timeStatus()!=timeSet) { //set time only first time
+    setTime(timeClient.getEpochTime());
+    Serial.println("set time for first time!!!");
+    seTimeOk++;
+  }
+    
   sensors_event_t event;
 
   if (WiFi.status() != WL_CONNECTED) ESP.reset(); // verifica lo stato della  connessione
-  static bool enableTemperature = true;
-  static bool enableHumidityRead = true;
-  if(((minute()==59) || (minute()== 29)) && (second()==0) && enableTemperature){ //alla mezz'ora e al cambio ora leggo temperatura 
+    
+  if((((minute()-1) % 2 == 0)) && (second()==0)){ // ogni 2 min leggo temp 
+  //if(((minute()==59) || (minute()== 29)) && (second()==0) && enableTemperature){ //alla mezz'ora e al cambio ora leggo temperatura 
     dht.temperature().getEvent(&event);
     float temp = event.temperature;
     if (isnan(event.temperature)) { // se errore lettura temperatura
@@ -254,35 +269,42 @@ void loop() {
       Serial.print(F("Temperatura: "));
       Serial.print(temp);
       Serial.println(F("°C"));
-      stato=stato+"[Temp ok ("+String(hour())+":"+String(minute())+":"+String(second())+")]";
-      lastTemperatureRead = temp;
-      enableTemperature = false;
-      //delay(1100); //attendo un secondo per uscire da questa condizione
+      if (((minute()-1) == 58) || ((minute()-1) == 28)) { // se la lettura avviene poco prima dell'invio registra stato
+          stato=stato+"[Temp ok ("+String(hour())+":"+String(minute())+":"+String(second())+")]";
+      }
+      lastTemperatureRead = temp;      
     }
+    delay(1500);
   }
-  if(((minute()==59) || (minute()== 29)) && (second()==5) && enableHumidityRead){ //alla mezz'ora e al cambio ora leggo  umidità      
+  if((((minute()-1) % 2 == 0)) && (second()==5)){ // ogni 2 min leggo umidità 
+  //if(((minute()==59) || (minute()== 29)) && (second()==5) && enableHumidityRead){ //alla mezz'ora e al cambio ora leggo  umidità      
     dht.humidity().getEvent(&event);
-    float hum=event.relative_humidity;
+    float hum=event.relative_humidity-20;// sensore umidità corrotto!!!
     if (isnan(event.relative_humidity)) { // se errore lettura umidità
       Serial.println(F("Error reading humidity!"));
       stato=stato+" Error reading humidity";
-      setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettura 
-      enableTemperature = true;   
+      setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettura  
     } else {
       Serial.print(F("Umidità: "));
       Serial.print(hum);
       Serial.println(F("%"));
       Serial.println("lettura dati ok!!!");
-      stato=stato+"[Read data ok ("+String(hour())+":"+String(minute())+":"+String(second())+")]";
-      ThingSpeak.setStatus(stato);
+      if (((minute()-1) == 58) || ((minute()-1) == 28)) { // se la lettura avviene poco prima dell'invio registra stato
+          stato=stato+"[Read data ok ("+String(hour())+":"+String(minute())+":"+String(second())+")]";
+      }/*else if (now()!=timeClient.getEpochTime()){ // se non siamo in prossimità del caricamento dati verifica l'allineamento data
+          setTime(timeClient.getEpochTime());   // se diverso riallinea data
+          seTimeOk++; // incrementa il contatore assoluto dei riallineamenti
+      }*/
       lastHumidityRead = hum;
-      enableHumidityRead = false;
-      //delay(1100); //attendo un secondo per uscire da questa condizione
     }
+    delay(1500);
   }    
   if(((minute()==0) || (minute()== 30)) && (second()==0)){ // dopo altri due minuti invia la lettura
-    ThingSpeak.setField(1, lastTemperatureRead);
-    ThingSpeak.setField(2, lastHumidityRead);
+    // se l'invio è prima di una lettura allora imposta 15.99 di default la temperatura
+    ThingSpeak.setField(1, (lastTemperatureRead == 0.0? float(15.99) : lastTemperatureRead));
+    // se l'invio è prima di una lettura allora imposta 50.99 di default l'umidità
+    ThingSpeak.setField(2, (lastHumidityRead == 0.0? float(50.99) : lastHumidityRead));
+    ThingSpeak.setStatus(stato);
     int x = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
     if(x == 200){
       Serial.println("Channel update successful.");
@@ -293,15 +315,13 @@ void loop() {
       stato=stato+"* Problem updating. Err. Code " + msgFeedBack(x)+" *"; 
       setTime(now()-120); // se ci sono problemi riporta indietro il tempo di 2 min e ricomincia daccapo
     }
-    enableTemperature = true;
-    enableHumidityRead = true;
   }
   count=minute()>=30? 60-minute():30-minute(); // countdown in base al minuto
   
   //telegram step
   if (myBot.getNewMessage(msg)) { //se è presente un messaggio
     if (msg.text.equalsIgnoreCase("read")) {
-      String replay = "Ciao " + String(msg.sender.firstName) + "!!!\nGli ultimi dati letti:";
+      String replay = "Ciao " + String(msg.sender.firstName) + "!!!\nThe last data read:";
       replay += "\nLast temperature: " + String(lastTemperatureRead) + "°C";
       replay += "\nLast humidity: " + String(lastHumidityRead) + "%";
       double s = lastTemperatureRead - 37.25*(2 - log10(double(lastHumidityRead))); // punto di rugiada
@@ -415,6 +435,7 @@ void handleFileUpload(AsyncWebServerRequest *request, String filename, size_t in
 void dirRequest (AsyncWebServerRequest *request){
     // per la verifica del json>>>>    https://filosophy.org/code/fixing-syntaxerror-unexpected-string-token-in-json-at-position/ 
     // oppure                  >>>>    http://jsonviewer.stack.hu/
+    // oppure                  >>>>    https://arduinojson.org/v6/assistant/
     String json;
     
     //creo il json da inviare
@@ -443,10 +464,12 @@ void dirRequest (AsyncWebServerRequest *request){
     JsonArray infosys = doc.createNestedArray("infosys");
     infosys.add(String("Total Space:     " + String(fs_info.totalBytes)    + " byte"));
     infosys.add(String("Space Used:      " + String(fs_info.usedBytes)     + " byte"));
-    infosys.add(String("Block Size:      " + String(fs_info.blockSize)     + " byte"));
-    infosys.add(String("Page Size:       " + String(fs_info.totalBytes)    + " byte"));
-    infosys.add(String("Max open files:  " + String(fs_info.maxOpenFiles)  + " files"));
-    infosys.add(String("Max path lenght: " + String(fs_info.maxPathLength)));
+    //infosys.add(String("Block Size:      " + String(fs_info.blockSize)     + " byte"));
+    //infosys.add(String("Page Size:       " + String(fs_info.totalBytes)    + " byte"));
+    //infosys.add(String("Max open files:  " + String(fs_info.maxOpenFiles)  + " files"));
+    infosys.add(String("Comp. Date:      " + String(__DATE__)));
+    infosys.add(String("Comp. Time:      " + String(__TIME__)));
+    infosys.add(String("Voltage:         " + String(ESP.getVcc()/1000.00)+" Volt"));
     if (count!=1){  //se non è all'ultimo minuto conta i minuti
       infosys.add(String("Count down:      -" + String(count) + " min"));
     } else{ // se è all'ultimo minuto conta i secondi 
@@ -458,11 +481,15 @@ void dirRequest (AsyncWebServerRequest *request){
     doc["Board_Name"] = boardName;
     doc["Temperature"] = String(lastTemperatureRead);
     doc["Humidity"] = String(lastHumidityRead);
+    doc["Pressure"] ="--";
     doc["Host_name"] = hostName;
     doc["Count"]= count;
-    //doc["bot"] = myBot.begin(); //inchioda la scheda
-    //doc["City"] = "Taranto (Italy)";
-    
+    doc["hour"] = String(hour()); 
+    doc["minute"] = String(minute());
+    doc["flag"] = 0; //seTimeOk;
+    doc["compDate"]=__DATE__;
+    doc["compTime"]=__TIME__;
+    doc["Voltage"]=String(ESP.getVcc()/1000.00);
     serializeJson(doc, json);
     request->send(200, "text/json", json);
 }
