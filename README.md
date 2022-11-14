@@ -117,12 +117,12 @@ Through the bot, you can interrogate the sensor with commands:
     <li><b>"<em>read</em>"</b>:  returns the latest temperature and humidity reading;</li>
     <li><b>"<em>wifi</em>"</b>:  returns the parameters of the wifi connection;</li>
     <li><b>"<em>stato</em>"</b>: returns the last status of the data transmission to ThingSpeak;</li>
-    <li><b>"<em>reset</em>"</b>: reboot the card.</li>
+    <li><b>"<em>reset</em>"</b>: reboot the card/board.</li>
 </ul> 
 <br>
 
 ### Project version for BME280 sensor
-Of this project there is also the version for DHT22 sensors. However, only the temperature and humidity can be read with these sensors. you can find it in the repository: https://github.com/birrozza/ESP8266_Sensor_BME280
+Of this project there is also the version for BME280 sensors. With this sensor it is also possible to read the *pressure* as well as the temperature and humidity. You can find it in the repository: https://github.com/birrozza/ESP8266_Sensor_BME280
 
 <br>
 <strong>Stay tuned!!! (last update November 2022)</strong>
