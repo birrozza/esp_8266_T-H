@@ -240,6 +240,7 @@ void setup() {
 } // end setup
 
 int seTimeOk = 0;
+ADC_MODE(ADC_VCC); // allows you to monitor the internal VCC level; it varies with WiFi load
 
 void loop() {
   MDNS.update();
