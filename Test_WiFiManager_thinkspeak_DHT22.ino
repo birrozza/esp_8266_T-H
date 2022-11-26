@@ -45,6 +45,7 @@ float lastHumidityRead = 0.0;
 AsyncTelegram myBot;
 String stato="*ESP start"; // stato corrente del sistema
 int count=0;  
+String console = "\n\nStart!!!";
 
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
@@ -169,7 +170,7 @@ void setup() {
    
   server.begin();                           // Actually start the server
   Serial.println("HTTP server started");
-
+  console+= "\n HTTP server ok!!";
   // modify TTL associated  with the domain name (in seconds)
   // default is 60 seconds
   //dnsServer.setTTL(300);
@@ -207,36 +208,57 @@ void setup() {
   Serial.print("\nTest Telegram connection... ");
   if (myBot.begin()){
     Serial.println("Telegram OK");
+    console+="\n Telegram OK";
     //alla fine mandi un messaggio al bot telegram dopo un'attesa di 2 sec
     //delay(2000);
     //String replay = "Avvio " + boardName;
     //myBot.sendMessage(msg, replay);
   } else { 
     Serial.println("Telegram NO OK");
+    console+="\n Telegram no OK";
   }
 
   // Prepare OTA handler
   ArduinoOTA.onStart([]() {
     Serial.println("Start");
+    console+= "\n OTA start!!!";
   });
   ArduinoOTA.onEnd([]() {
     Serial.println("\nEnd");
+    console+= "\n OTA end!!!";
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
     Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
   });
   ArduinoOTA.onError([](ota_error_t error) {
     Serial.printf("Error[%u]: ", error);
-    if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-    else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-    else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-    else if (error == OTA_END_ERROR) Serial.println("End Failed");
+    if (error == OTA_AUTH_ERROR) {
+      Serial.println("Auth Failed");
+      console+= "\n OTA err: Auth Failed ";
+    }
+    else if (error == OTA_BEGIN_ERROR) {
+      Serial.println("Begin Failed");
+      console+= "\n OTA err: Begin Failed ";
+    }
+    else if (error == OTA_CONNECT_ERROR) {
+      Serial.println("Connect Failed");
+      console+= "\n OTA err: Connect Failed ";
+    }
+    else if (error == OTA_RECEIVE_ERROR) {
+      Serial.println("Receive Failed");
+      console+= "\n OTA err: Receive Failed ";
+    }
+    else if (error == OTA_END_ERROR) {
+      Serial.println("End Failed");
+      console+= "\n OTA err: End Failed";
+    }
   });
 
   ArduinoOTA.setHostname((const char *)hostName.c_str());
   ArduinoOTA.begin();
+  console+= "\n OTA service ok";
   
+  console+= "\n go!!!";
 } // end setup
 
 int seTimeOk = 0;
@@ -251,6 +273,7 @@ void loop() {
   if (timeStatus()!=timeSet) { //set time only first time
     setTime(timeClient.getEpochTime());
     Serial.println("set time for first time!!!");
+    console+= "\n time setted\n";
     seTimeOk++;
   }
     
@@ -265,17 +288,19 @@ void loop() {
     if (isnan(event.temperature)) { // se errore lettura temperatura
       Serial.println(F("Error reading temperature!"));
       stato=stato+" Error reading temperature";
+      console+= "\n err read temp";
       setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettura
     } else {
       Serial.print(F("Temperatura: "));
       Serial.print(temp);
       Serial.println(F("°C"));
+      console+="T-";
       if (((minute()-1) == 58) || ((minute()-1) == 28)) { // se la lettura avviene poco prima dell'invio registra stato
           stato=stato+"[Temp ok ("+String(hour())+":"+String(minute())+":"+String(second())+")]";
       }
       lastTemperatureRead = temp;      
     }
-    delay(1500);
+    delay(1100);
   }
   if((((minute()-1) % 2 == 0)) && (second()==5)){ // ogni 2 min leggo umidità 
   //if(((minute()==59) || (minute()== 29)) && (second()==5) && enableHumidityRead){ //alla mezz'ora e al cambio ora leggo  umidità      
@@ -284,12 +309,14 @@ void loop() {
     if (isnan(event.relative_humidity)) { // se errore lettura umidità
       Serial.println(F("Error reading humidity!"));
       stato=stato+" Error reading humidity";
+      console+= "\n err read hum";
       setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettura  
     } else {
       Serial.print(F("Umidità: "));
       Serial.print(hum);
       Serial.println(F("%"));
       Serial.println("lettura dati ok!!!");
+      console+="H ";
       if (((minute()-1) == 58) || ((minute()-1) == 28)) { // se la lettura avviene poco prima dell'invio registra stato
           stato=stato+"[Read data ok ("+String(hour())+":"+String(minute())+":"+String(second())+")]";
       }/*else if (now()!=timeClient.getEpochTime()){ // se non siamo in prossimità del caricamento dati verifica l'allineamento data
@@ -310,6 +337,7 @@ void loop() {
     if(x == 200){
       Serial.println("Channel update successful.");
       stato="[Data updated ("+String(x)+")]"; // azzera lo stato
+      console+="-|\n";
       delay(1100); //attendo un secondo per uscire da questa condizione
     } else {
       Serial.println("Problem updating channel. HTTP error  " + msgFeedBack(x)); 
@@ -321,6 +349,7 @@ void loop() {
   
   //telegram step
   if (myBot.getNewMessage(msg)) { //se è presente un messaggio
+    console+="\n telegram msg from "+String(msg.sender.firstName)+"\n";
     if (msg.text.equalsIgnoreCase("read")) {
       String replay = "Ciao " + String(msg.sender.firstName) + "!!!\nThe last data read:";
       replay += "\nLast temperature: " + String(lastTemperatureRead) + "°C";
@@ -491,6 +520,8 @@ void dirRequest (AsyncWebServerRequest *request){
     doc["compDate"]=__DATE__;
     doc["compTime"]=__TIME__;
     doc["Voltage"]=String(ESP.getVcc()/1000.00);
+    doc["console"]=console;
+    console="";
     serializeJson(doc, json);
     request->send(200, "text/json", json);
 }

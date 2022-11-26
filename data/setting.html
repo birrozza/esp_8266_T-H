@@ -11,8 +11,8 @@
               text-align: center;
               padding: 0;
               margin: 0;
-              width: 100vw;
-              height: 100vh;
+              width: 100%;
+              /*height: 100vh;*/
               cursor: default;
               overflow-x: hidden; /* Hide x scrollbars */ 
               background: linear-gradient(241.02deg, rgba(80, 128, 131, 0.72) 0%, rgba(23, 0, 165, 0.78) 100%);
@@ -195,7 +195,11 @@
             p, p#rssi{
               padding: 4px;
               font-size: 14px !important;
-            }  
+            }
+            .open{
+              width:98% !important;
+            }
+                      
           }
           @media screen and (min-width: 600px){
             fieldset{
@@ -204,14 +208,68 @@
             textarea#infotextarea, textarea#dirtextarea{
               width: 75%;
               font-size:15px;
-            }              
-          }
-          .toAnimate{
-              animation: animateHeart 2s infinite;
             }
-          @keyframes animateHeart {
+          }
+          .toAnimateGreen{
+              animation: animateHeartG 2s infinite;
+            }          
+          @keyframes animateHeartG {
               50% {background: green; color: white;}
-          }                
+          }
+          .toAnimateYellow{
+            animation: animateHeartY 2s infinite;
+          }
+          @keyframes animateHeartY {
+              50% {background: yellow; color: red;}
+          }
+          .console{
+            border-radius: 0px 8px 8px 0px;
+            background-color: #999;            
+            border: 1px solid blue;            
+            position: fixed;
+            width: 25px;
+            height: 30vh;
+            top:10%;
+            left:0;
+            z-index: 2;
+            transition: all 1.5s ;
+
+            display: inline-flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            justify-content: normal;
+            align-items: stretch;
+            align-content: stretch;
+          }
+          .consoleTextArea{
+            color:black;
+            width: 90%;
+            height: 85%;
+            transition: all 1.5s ;
+            position: relative;
+            top: 5px;
+            margin-left: 5px;
+          }
+          .textConsole{    
+            font-weight: bold;
+            text-orientation: upright;
+            writing-mode: vertical-rl;
+            width: 20px;
+            right:50%;
+            top:20%;
+            margin: 5px;
+          }
+          .open{
+            width:50% ;
+            box-shadow: 11px 11px 15px rgb(15 67 116 / 49%);
+          } 
+          .close{
+            border: #000;
+            background: #000;
+            width: 0px;
+            margin: 0;
+            padding: 0;
+          }                         
     </style>
     <!-- Download Jquery-->
     <script type = "text/javascript" 
@@ -309,7 +367,11 @@
     </form>    
     <form action="reset" method="get">
             <input type="submit" value="REBOOT" class="tastoRST" id="element" title="Reboot the board!!!">
-    </form>   
+    </form>  
+    <div class="console" title="Similar to arduino serial monitor">
+      <textarea class="consoleTextArea close" disabled="true"></textarea>
+      <div class="textConsole">console</div>
+    </div> 
     <script>
         const form        = document.getElementById('formUpload');
         const fileName    = document.getElementById('filename');
@@ -319,7 +381,8 @@
         const rssi        = document.getElementById('rssi');
         const ssid        = document.getElementById('ssid');
         const boardName   = document.getElementById('boardname');
-        /*const temp        = document.getElementById('temp');*/
+        const consol      = document.getElementsByClassName('console')[0];
+        const consolTextArea = document.getElementsByClassName('consoleTextArea')[0];
         /*const humid       = document.getElementById('humid'); */
         /*const contatore       = document.getElementById('contatore');*/
         const dataTextArea= document.getElementById('datatextarea'); 
@@ -341,8 +404,6 @@
                 }
                 return response.json();
             }).then(function (json) {
-                    /*dataTextArea.setAttribute("style","background-color: yellow;");*/
-                    /*flag=json['flag'];*/
                     if(json['flag']=='1'){
                       console.log('blink-on');
                       dataTextArea.setAttribute("style","animation-duration: 2s;");
@@ -362,30 +423,6 @@
                     rssi.textContent     = "RSSI:  " + json['RSSI'] + " db";
                     ssid.textContent     = "SSId:  " + json['SSID'] ;
                     boardName.textContent= "Board: " + json['Board_Name']; 
-                    /*let arraydata=[`Temp. : ${json['Temperature']} °C\n`,`Humid.: ${json['Humidity']} %\n`,`Press.: ${json['Pressure']} hPa\n`,"---"];
-                    
-                    textArea="";
-                    let i=0;
-                    let ricorsione= function(){
-                      textArea+=arraydata[i++];
-                      dataTextArea.textContent="";
-                      if(i>2) return;
-                      setTimeout(()=>{},1000);
-                      
-                      dataTextArea.textContent=textArea;
-                      ricorsione();
-                    };
-                    ricorsione();
-                    textArea="";
-                    textArea="Press.: " + json['Pressure'] + " hPa\n";
-                    dataTextArea.value=textArea;
-                    for(let i=0; i<100; i++){
-                      dataTextArea.value="";
-                      console.log(".");}
-                    textArea="Humid.: " + json['Humidity'] + " %\n"+"Press.: " + json['Pressure'] + " hPa\n";
-                    dataTextArea.value=textArea;
-                    for(let i=0; i<200; i++){console.log(".");}*/
-                    
                     textArea="Temp. : " + json['Temperature'] + " \u00B0C\n"+"Humid.: " + json['Humidity'] + " %\n"+"Press.: " + json['Pressure'] + " hPa\n";
                     dataTextArea.value=textArea;
                     textArea ="Info system: \n";
@@ -397,15 +434,32 @@
                         textArea += sysinfo[i]+strForCount+br;    
                     }
                     infTextArea.value = textArea;
-                    /*console.log("ok");*/
+                    if (!json['console']==""){
+                      consolTextArea.textContent += json['console'];
+                    }
                     rssi.setAttribute("style","color: green; border-color: green;");
-                    rssi.classList.add("toAnimate");                    
+                    console.log(parseInt(json['RSSI']));
+                    if (parseInt(json['RSSI'])<=-80){
+                      rssi.classList.add("toAnimateYellow");
+                      rssi.classList.remove("toAnimateGreen");
+                    } else {
+                      rssi.classList.add("toAnimateGreen");    
+                      rssi.classList.remove("toAnimateYellow");
+                    }               
             }).catch (function (err) {
-                    rssi.setAttribute("style","border-color: red; color: red;");
-                    rssi.classList.remove("toAnimate");
+                    rssi.setAttribute("style","border-color: red; color: red;");                    
+                    rssi.classList.remove("toAnimateGreen");                    
+                    rssi.classList.remove("toAnimateYellow");
                     console.log('Fetch problem: ' + err.message);
             });            
           } 
+        
+        consol.addEventListener("click", ()=>{
+          consol.classList.toggle("open");
+
+          consolTextArea.classList.toggle("close");
+        });
+    
     </script>
   </body>
 </html>
