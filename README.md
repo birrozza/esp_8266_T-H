@@ -62,7 +62,7 @@ Choose one of the access points scanned, enter password, click save.
 ESP will try to connect. If successful, it relinquishes control back to your app. If not, reconnect to AP and reconfigure.
 [Here this tutorial](https://github.com/alanswx/ESPAsyncWiFiManager).
 
-Once the wifi connection is made, the card is now reachable on our network. It is sufficient to type in the address bar of the browser the url <b>http://myesp.local</b> to be able to navigate between the sensor pages. The host name is the default but can be changed in the _config.json_ file ([see below](#configuration)).  
+Once the wifi connection is made, the card is now reachable on our network. It is sufficient to type in the address bar of the browser the url <b>http://myesp.local</b> or the IP address associated by your network to your card, to be able to navigate between the sensor pages. The host name is the default but can be changed in the _config.json_ file ([see below](#configuration)).  
 
 In the <b>landing</b> page the access data (<b>user</b> & <b>password</b>) are available as tip by passing the pointer over the fields. They are editable via the _config.json_ file.
 
@@ -103,7 +103,13 @@ After modifying the file, you can upload it using the "_upload file_" function o
 ### Firmware OTA update (Over The Air)
 You can now also update the firmware in the card via the **OTA (Over The Air)** feature. In fact, it is no longer necessary to connect it to the PC but through the Arduino IDE it can be updated remotely. Just select the network port in the menu: *tools -> port -> Network Ports*.
 
-<h2>Enable a Telegram bot to be able to interrogate the sensor</h2>
+### Slide console
+
+![](/images/console_open.png)
+
+On the left side of the setting page there is now a "console" button. If you click on it, a sliding panel opens which replicates the serial monitor of the arduino ide. On this are reported a series of useful information in case of debugging.
+
+### Enable a Telegram bot to be able to interrogate the sensor
 
 ![](/images/telegram.jpg)
 
