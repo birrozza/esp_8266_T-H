@@ -281,8 +281,7 @@ void loop() {
 
   if (WiFi.status() != WL_CONNECTED) ESP.reset(); // verifica lo stato della  connessione
     
-  if((((minute()-1) % 2 == 0)) && (second()==0)){ // ogni 2 min leggo temp 
-  //if(((minute()==59) || (minute()== 29)) && (second()==0) && enableTemperature){ //alla mezz'ora e al cambio ora leggo temperatura 
+  if((((minute()-1) % 2 == 0)) && (second()==0)){ // ogni min dispari leggo temp   
     dht.temperature().getEvent(&event);
     float temp = event.temperature;
     if (isnan(event.temperature)) { // se errore lettura temperatura
@@ -302,10 +301,9 @@ void loop() {
     }
     delay(1100);
   }
-  if((((minute()-1) % 2 == 0)) && (second()==5)){ // ogni 2 min leggo umidità 
-  //if(((minute()==59) || (minute()== 29)) && (second()==5) && enableHumidityRead){ //alla mezz'ora e al cambio ora leggo  umidità      
+  if((((minute()-1) % 2 == 0)) && (second()==5)){ // ogni min dispari al secondo 5 leggo hum 
     dht.humidity().getEvent(&event);
-    float hum=event.relative_humidity-20;// sensore umidità corrotto!!!
+    float hum=event.relative_humidity;// sensore umidità corrotto!!!
     if (isnan(event.relative_humidity)) { // se errore lettura umidità
       Serial.println(F("Error reading humidity!"));
       stato=stato+" Error reading humidity";
@@ -319,13 +317,10 @@ void loop() {
       console+="H ";
       if (((minute()-1) == 58) || ((minute()-1) == 28)) { // se la lettura avviene poco prima dell'invio registra stato
           stato=stato+"[Read data ok ("+String(hour())+":"+String(minute())+":"+String(second())+")]";
-      }/*else if (now()!=timeClient.getEpochTime()){ // se non siamo in prossimità del caricamento dati verifica l'allineamento data
-          setTime(timeClient.getEpochTime());   // se diverso riallinea data
-          seTimeOk++; // incrementa il contatore assoluto dei riallineamenti
-      }*/
+      }
       lastHumidityRead = hum;
     }
-    delay(1500);
+    delay(1100);
   }    
   if(((minute()==0) || (minute()== 30)) && (second()==0)){ // dopo altri due minuti invia la lettura
     // se l'invio è prima di una lettura allora imposta 15.99 di default la temperatura
@@ -336,8 +331,8 @@ void loop() {
     int x = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
     if(x == 200){
       Serial.println("Channel update successful.");
-      stato="[Data updated ("+String(x)+")]"; // azzera lo stato
-      console+="-|\n";
+      stato="Data updated!"; // azzera lo stato
+      console+="*\n";
       delay(1100); //attendo un secondo per uscire da questa condizione
     } else {
       Serial.println("Problem updating channel. HTTP error  " + msgFeedBack(x)); 
@@ -365,6 +360,7 @@ void loop() {
     else if (msg.text.equalsIgnoreCase("stato")){
       String replay = "Stato: " + stato;
       replay += "\nCount: -"+String(count)+" min";
+      replay += "\nLengt: "+String(console.length());
       myBot.sendMessage(msg, replay);
     } // stato
     else if (msg.text.equalsIgnoreCase("reset")){
@@ -516,6 +512,7 @@ void dirRequest (AsyncWebServerRequest *request){
     doc["Count"]= count;
     doc["hour"] = String(hour()); 
     doc["minute"] = String(minute());
+    doc["second"] = String(second());
     doc["flag"] = 0; //seTimeOk;
     doc["compDate"]=__DATE__;
     doc["compTime"]=__TIME__;
