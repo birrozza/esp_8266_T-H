@@ -131,7 +131,7 @@ Through the bot, you can interrogate the sensor with commands:
 Of this project there is also the version for BME280 sensors. With this sensor it is also possible to read the *pressure* as well as the temperature and humidity. You can find it in the repository: https://github.com/birrozza/ESP8266_Sensor_BME280
 
 <br>
-<strong>Stay tuned!!! (last update November 2022)</strong>
+
 
 If you want to support me, you can always donate to my paypal account https://www.paypal.me/birrozza. 
 
