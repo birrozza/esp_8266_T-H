@@ -44,6 +44,7 @@ float lastTemperatureRead = 0.0;
 float lastHumidityRead = 0.0;
 AsyncTelegram myBot;
 String stato="*ESP start"; // stato corrente del sistema
+int blinking = 0;
 int count=0;  
 String console = "\n\nStart!!!";
 
@@ -321,6 +322,7 @@ void loop() {
       lastHumidityRead = hum;
     }
     delay(1100);
+    blinking = 1;
   }    
   if(((minute()==0) || (minute()== 30)) && (second()==0)){ // dopo altri due minuti invia la lettura
     // se l'invio è prima di una lettura allora imposta 15.99 di default la temperatura
@@ -513,7 +515,7 @@ void dirRequest (AsyncWebServerRequest *request){
     doc["hour"] = String(hour()); 
     doc["minute"] = String(minute());
     doc["second"] = String(second());
-    doc["flag"] = 0; //seTimeOk;
+    doc["flag"] = blinking; 
     doc["compDate"]=__DATE__;
     doc["compTime"]=__TIME__;
     doc["Voltage"]=String(ESP.getVcc()/1000.00);
@@ -521,6 +523,7 @@ void dirRequest (AsyncWebServerRequest *request){
     console="";
     serializeJson(doc, json);
     request->send(200, "text/json", json);
+    blinking = 0;
 }
 
 /*

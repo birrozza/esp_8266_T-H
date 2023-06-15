@@ -395,11 +395,14 @@
         var uniqueURL = "/directory"; 
         /*let cont=0;*/
         /*let flag=0;*/
-        
+        let alertShow = false;
         refresh();
         setInterval(refresh, 5000 );
-        let id;
+        //let id;
+        
         function refresh (){
+            document.title = alertShow ? "By Angelo MIRABELLI" : "Esp 8266 Setting";
+            alertShow = !alertShow;
             fetch(uniqueURL).then(function(response) { /* get metodo*/
                 if (!response.ok){
                   console.log("Error: promise reject ");
@@ -458,7 +461,7 @@
             });            
           } 
         
-        consol.addEventListener("click", ()=>{
+          consol.addEventListener("click", ()=>{
           consol.classList.toggle("open");
 
           consolTextArea.classList.toggle("close");
