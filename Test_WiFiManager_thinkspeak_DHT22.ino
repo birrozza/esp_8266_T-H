@@ -19,11 +19,12 @@
 #include <TimeLib.h>            // ver 1.6.1
 #include <ArduinoOTA.h>   
 #include <math.h>
+#include <SimpleDHT.h>
        
 #include "utility.h"
 #include "C:\Users\computer\Desktop\esp8266 sketch\secret.h"   // always comment on this line (for development only) 
 //#include "secret.h" // uncomment if it's commented out
-#include "sensore_DHT_22.h"     //  
+//#include "sensore_DHT_22.h"     //  
 #include "testiHTML.h" // la sintassi HTML con indentazione leggibile
 
 #define GOOGLE_SHEET_ENABLED //video 529
@@ -45,7 +46,20 @@ float lastHumidityRead = 0.0;
 AsyncTelegram myBot;
 String stato="*ESP start"; // stato corrente del sistema
 int blinking = 0;
-int count=0;  
+int count=0;
+int pinDHT22 = 4;
+SimpleDHT22 dht22(pinDHT22);
+void idle();
+void lettura();
+void invio();
+
+int indice = 0; // indice del puntatore a funzion puntatore 
+bool first_lettura = true; // prima occorrenza lettura
+bool first_invio   = false; // prima occorrenza invio
+
+typedef void (*fDistati)();
+fDistati stati[] = {idle, lettura, invio};
+
 String console = "\n\nStart!!!";
 
 // Define NTP Client to get time
@@ -198,8 +212,6 @@ void setup() {
 
   ThingSpeak.begin(client);
   
-  sensore_DHT_22(); //setup del sensore
-
   // Set the Telegram bot properies
   myBot.setClock("CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00");  //CET-1CEST,M3.5.0,M10.5.0/3
   myBot.setUpdateTime(2000);
@@ -277,72 +289,12 @@ void loop() {
     console+= "\n time setted\n";
     seTimeOk++;
   }
-    
-  sensors_event_t event;
-
+  
   if (WiFi.status() != WL_CONNECTED) ESP.reset(); // verifica lo stato della  connessione
-    
-  if((((minute()-1) % 2 == 0)) && (second()==0)){ // ogni min dispari leggo temp   
-    dht.temperature().getEvent(&event);
-    float temp = event.temperature;
-    if (isnan(event.temperature)) { // se errore lettura temperatura
-      Serial.println(F("Error reading temperature!"));
-      stato=stato+" Error reading temperature";
-      console+= "\n err read temp";
-      setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettura
-    } else {
-      Serial.print(F("Temperatura: "));
-      Serial.print(temp);
-      Serial.println(F("°C"));
-      console+="T-";
-      if (((minute()-1) == 58) || ((minute()-1) == 28)) { // se la lettura avviene poco prima dell'invio registra stato
-          stato=stato+"[Temp ok ("+String(hour())+":"+String(minute())+":"+String(second())+")]";
-      }
-      lastTemperatureRead = temp;      
-    }
-    delay(1100);
-  }
-  if((((minute()-1) % 2 == 0)) && (second()==5)){ // ogni min dispari al secondo 5 leggo hum 
-    dht.humidity().getEvent(&event);
-    float hum=event.relative_humidity;// sensore umidità corrotto!!!
-    if (isnan(event.relative_humidity)) { // se errore lettura umidità
-      Serial.println(F("Error reading humidity!"));
-      stato=stato+" Error reading humidity";
-      console+= "\n err read hum";
-      setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettura  
-    } else {
-      Serial.print(F("Umidità: "));
-      Serial.print(hum);
-      Serial.println(F("%"));
-      Serial.println("lettura dati ok!!!");
-      console+="H ";
-      if (((minute()-1) == 58) || ((minute()-1) == 28)) { // se la lettura avviene poco prima dell'invio registra stato
-          stato=stato+"[Read data ok ("+String(hour())+":"+String(minute())+":"+String(second())+")]";
-      }
-      lastHumidityRead = hum;
-    }
-    delay(1100);
-    blinking = 1;
-  }    
-  if(((minute()==0) || (minute()== 30)) && (second()==0)){ // dopo altri due minuti invia la lettura
-    // se l'invio è prima di una lettura allora imposta 15.99 di default la temperatura
-    ThingSpeak.setField(1, (lastTemperatureRead == 0.0? float(15.99) : lastTemperatureRead));
-    // se l'invio è prima di una lettura allora imposta 50.99 di default l'umidità
-    ThingSpeak.setField(2, (lastHumidityRead == 0.0? float(50.99) : lastHumidityRead));
-    ThingSpeak.setStatus(stato);
-    int x = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
-    if(x == 200){
-      Serial.println("Channel update successful.");
-      stato="Data updated!"; // azzera lo stato
-      console+="*\n";
-      delay(1100); //attendo un secondo per uscire da questa condizione
-    } else {
-      Serial.println("Problem updating channel. HTTP error  " + msgFeedBack(x)); 
-      stato=stato+"* Problem updating. Err. Code " + msgFeedBack(x)+" *"; 
-      setTime(now()-120); // se ci sono problemi riporta indietro il tempo di 2 min e ricomincia daccapo
-    }
-  }
-  count=minute()>=30? 60-minute():30-minute(); // countdown in base al minuto
+
+  stati[indice](); 
+  
+  count = minute()>=30? 60-minute():30-minute(); // countdown in base al minuto
   
   //telegram step
   if (myBot.getNewMessage(msg)) { //se è presente un messaggio
@@ -377,6 +329,66 @@ void loop() {
     }
   } // end telegram bot
 } // end loop
+
+void idle(){
+  if((((minute()-1) % 2 == 0)) && (second()==0)){ // ogni min dispari leggo sensore   
+    indice = 1; // imposta lo stato su lettura
+  } else {
+    first_lettura = true;    
+  }
+  if(((minute()==0) || (minute()== 30)) && (second()==0)){ // dopo altri due minuti invia la lettura
+    indice = 2; // imposta lo stato su invio
+  } else {
+    first_invio = true;
+  }
+}
+void lettura(){
+  if (first_lettura){    
+    float temperature = 0;
+    float humidity = 0;
+    int err = SimpleDHTErrSuccess;
+    if ((err = dht22.read2(&temperature, &humidity, NULL)) != SimpleDHTErrSuccess) {
+      Serial.print(F("Error reading data!"));
+      Serial.println(SimpleDHTErrDuration(err));
+      stato=stato+" Error reading data";
+      console+= "\n err read data";
+      setTime(now()-65);// porto indietro di 1 min l'orologio se ci sono problemi nella lettura      
+    } else {
+      Serial.print(temperature);
+      Serial.println(F("°C"));
+      Serial.print(F("Umidità: "));
+      Serial.print(humidity);
+      Serial.println(F("%"));
+      Serial.println("lettura dati ok!!!");
+      console+="T-H ";
+      lastTemperatureRead = temperature;
+      lastHumidityRead = humidity;
+      first_lettura = false;
+      blinking = 1;
+    }
+  }      
+  indice = 0;
+}
+void invio(){
+  if (first_invio){
+    ThingSpeak.setField(1, (lastTemperatureRead == 0.0? float(15.99) : lastTemperatureRead));
+    // se l'invio è prima di una lettura allora imposta 50.99 di default l'umidità
+    ThingSpeak.setField(2, (lastHumidityRead == 0.0? float(50.99) : lastHumidityRead));
+    ThingSpeak.setStatus(stato);
+    int x = ThingSpeak.writeFields(myChannelNumber, myWriteAPIKey);
+    if(x == 200){
+      Serial.println("Channel update successful.");
+      stato="Data updated!"; // azzera lo stato
+      console+="*\n";
+      first_invio = false;      
+    } else {
+      Serial.println("Problem updating channel. HTTP error  " + msgFeedBack(x)); 
+      stato=stato+"* Problem updating. Err. Code " + msgFeedBack(x)+" *"; 
+      setTime(now()-120); // se ci sono problemi riporta indietro il tempo di 2 min e ricomincia daccapo
+    }
+  }   
+  indice = 0;  
+}
 
 ///////// WEB SERVER metod ///////////////////
 
