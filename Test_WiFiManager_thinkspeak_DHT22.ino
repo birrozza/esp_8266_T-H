@@ -315,8 +315,8 @@ void loop() {
       String replay = "Stato: " + stato;
       replay += "\nCount: -"+String(count)+" min";
       replay += "\nLengt: "+String(console.length());
-      String ora = hour()<10 ? String("0"+hour()) : String(hour());
-      String minuto = minute()<10 ? String("0"+minute()) : String(minute());
+      String ora = hour()<10 ? "0"+hour() : String(hour());
+      String minuto = minute()<10 ? "0"+minute() : String(minute());
       replay += "\nSys time: "+ora+":"+minuto;
       myBot.sendMessage(msg, replay);
     } // stato
