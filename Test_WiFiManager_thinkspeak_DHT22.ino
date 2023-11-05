@@ -53,7 +53,7 @@ void idle();
 void lettura();
 void invio();
 
-int indice = 0; // indice del puntatore a funzion puntatore 
+int indice = 1; // indice del puntatore a funzion puntatore 
 bool first_lettura = true; // prima occorrenza lettura
 bool first_invio   = false; // prima occorrenza invio
 
