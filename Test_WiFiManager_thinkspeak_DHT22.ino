@@ -178,11 +178,12 @@ void setup() {
   server.on("/upload", HTTP_POST, [](AsyncWebServerRequest *request){
     request->send(200);
   },handleFileUpload);
-  
+
   server.onNotFound([](AsyncWebServerRequest *request){
     request->send(404, "text/html", sitoNonTrovato);  
   });
-   
+
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*"); 
   server.begin();                           // Actually start the server
   Serial.println("HTTP server started");
   console+= "\n HTTP server ok!!";
@@ -323,7 +324,9 @@ void loop() {
     else if (msg.text.equalsIgnoreCase("reset")){
       String replay = "Tra 5 secondi la scheda si riavvia" ;
       myBot.sendMessage(msg, replay);
-      delay(5000);
+      delay(2000);
+      myBot.reset();
+      delay(500);
       ESP.reset();
     } // reset
     else {
@@ -537,7 +540,7 @@ void dirRequest (AsyncWebServerRequest *request){
     doc["console"]=console;
     console="";
     serializeJson(doc, json);
-    request->send(200, "text/json", json);
+    request->send(200, "application/json; charset=utf-8", json);
     blinking = 0;
 }
 
