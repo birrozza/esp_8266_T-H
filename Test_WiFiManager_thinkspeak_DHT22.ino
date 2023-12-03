@@ -57,6 +57,9 @@ int indice = 1; // indice del puntatore a funzion puntatore
 bool first_lettura = true; // prima occorrenza lettura
 bool first_invio   = false; // prima occorrenza invio
 
+#define CALLBACK_QUERY_DATA "QueryData"
+ReplyKeyboard myKbd;
+
 typedef void (*fDistati)();
 fDistati stati[] = {idle, lettura, invio};
 
@@ -215,9 +218,14 @@ void setup() {
   
   // Set the Telegram bot properies
   myBot.setClock("CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00");  //CET-1CEST,M3.5.0,M10.5.0/3
-  myBot.setUpdateTime(2000);
+  myBot.setUpdateTime(1000);
   myBot.setTelegramToken(token);
-    
+  myKbd.addButton("Read");
+  myKbd.addButton("WiFi");
+  myKbd.addRow();
+  myKbd.addButton("Force");
+  myKbd.addButton("Stato");
+  myKbd.enableResize();  
   // Check if all things are ok
   Serial.print("\nTest Telegram connection... ");
   if (myBot.begin()){
@@ -300,26 +308,24 @@ void loop() {
   //telegram step
   if (myBot.getNewMessage(msg)) { //se è presente un messaggio
     console+="\n telegram msg from "+String(msg.sender.firstName)+"\n";
+    String replay = "";
     if (msg.text.equalsIgnoreCase("read")) {
-      String replay = "Ciao " + String(msg.sender.firstName) + "!!!\nThe last data read:";
+      replay = "Ciao " + String(msg.sender.firstName) + "!!!\nThe last data read:";
       replay += "\nLast temperature: " + String(lastTemperatureRead) + "°C";
       replay += "\nLast humidity: " + String(lastHumidityRead) + "%";
       double s = lastTemperatureRead - 37.25*(2 - log10(double(lastHumidityRead))); // punto di rugiada
       replay += "\nDev point: " + String(s); 
-      myBot.sendMessage(msg, replay );
     } // read
     else if (msg.text.equalsIgnoreCase("wifi")){
-      String replay = "SSID: "+WiFi.SSID()+"\nRSSI: " +WiFi.RSSI()+"\nIP: " + WiFi.localIP().toString()+"\nLocal host: "+hostName+"\nBoard: "+boardName;
-      myBot.sendMessage(msg, replay);
+      replay = "SSID: "+WiFi.SSID()+"\nRSSI: " +WiFi.RSSI()+"\nIP: " + WiFi.localIP().toString()+"\nLocal host: "+hostName+"\nBoard: "+boardName;
     } // wifi
     else if (msg.text.equalsIgnoreCase("stato")){
-      String replay = "Stato: " + stato;
+      replay = "Stato: " + stato;
       replay += "\nCount: -"+String(count)+" min";
       replay += "\nLengt: "+String(console.length());
       String ora = hour()<10 ? "0"+String(hour()) : String(hour());
       String minuto = minute()<10 ? "0"+String(minute()) : String(minute());
       replay += "\nSys time: "+ora+":"+minuto;
-      myBot.sendMessage(msg, replay);
     } // stato
     else if (msg.text.equalsIgnoreCase("reset")){
       String replay = "Tra 5 secondi la scheda si riavvia" ;
@@ -329,10 +335,14 @@ void loop() {
       delay(500);
       ESP.reset();
     } // reset
+    else if (msg.text.equalsIgnoreCase("force")){
+      indice = 2;
+      replay = "Force send ok..";
+    } // force
     else {
-      String replay = "Ciao!!! \nChoices available:\n- read -> temp & Humidity;\n- wifi -> wifi status;\n- stato -> stato;\n- reset -> to reset card.";
-      myBot.sendMessage(msg, replay);
+      replay = "Ciao!!! \nChoices available:\n- read -> temp & Humidity;\n- wifi -> wifi status;\n- stato -> stato;\n- force -> force send;\n- reset -> to reset card.";
     }
+    myBot.sendMessage(msg, replay.c_str(), myKbd );
   } // end telegram bot
 } // end loop
 
