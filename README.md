@@ -123,6 +123,7 @@ Through the bot, you can interrogate the sensor with commands:
     <li><b>"<em>read</em>"</b>:  returns the latest temperature and humidity reading;</li>
     <li><b>"<em>wifi</em>"</b>:  returns the parameters of the wifi connection;</li>
     <li><b>"<em>stato</em>"</b>: returns the last status of the data transmission to ThingSpeak;</li>
+    <li><b>"<em>force</em>"</b>: forces the last read to be sent to ThingSpeak;</li>
     <li><b>"<em>reset</em>"</b>: reboot the card/board.</li>
 </ul> 
 <br>
